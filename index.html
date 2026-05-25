@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LGW 减脂看板</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 { text-align: center; color: #444; margin-bottom: 30px; }
+        .stats { display: flex; justify-content: space-around; flex-wrap: wrap; }
+        .stat-item { text-align: center; margin: 10px; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #007bff; }
+        .stat-label { font-size: 14px; color: #666; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #eee; }
+        th { color: #666; font-weight: normal; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🦞 LGW 减脂看板</h1>
+        
+        <div class="card">
+            <h2>📊 当前状态</h2>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value">95.1</div>
+                    <div class="stat-label">当前体重 (kg)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">75.0</div>
+                    <div class="stat-label">目标体重 (kg)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">20.1</div>
+                    <div class="stat-label">待减重 (kg)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">29.9</div>
+                    <div class="stat-label">BMI</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📈 体重趋势</h2>
+            <canvas id="weightChart"></canvas>
+        </div>
+        
+        <div class="card">
+            <h2>🍽️ 今日饮食</h2>
+            <table>
+                <tr><th>餐次</th><th>内容</th><th>热量</th><th>蛋白</th><th>碳水</th><th>脂肪</th></tr>
+                <tr><td>午餐</td><td>鸡腿、紫米饭、炒白菜</td><td>~490</td><td>41g</td><td>46g</td><td>16g</td></tr>
+            </table>
+            <p style="margin-top:15px; font-size:14px; color:#666;">📅 最后更新：2026-05-25</p>
+        </div>
+
+        <div class="card">
+            <h2>💊 补剂记录</h2>
+            <p>纽崔莱植物蛋白粉、沛源蛋白粉、倍立健</p>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('weightChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['05-25'],
+                datasets: [{
+                    label: '体重 (kg)',
+                    data: [95.1],
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        suggestedMin: 70,
+                        suggestedMax: 100
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
