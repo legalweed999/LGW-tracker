@@ -1,152 +1,1289 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LGW 减脂看板</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            background: linear-gradient(135deg, #FF7F00 0%, #0066CC 100%);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-            color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .card {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        h1 { text-align: center; color: #fff; margin-bottom: 30px; font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .stats { display: flex; justify-content: space-around; flex-wrap: wrap; }
-        .stat-item { text-align: center; margin: 10px; }
-        .stat-value { font-size: 26px; font-weight: bold; color: #FF6600; }
-        .stat-label { font-size: 14px; color: #666; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #eee; }
-        th { color: #666; font-weight: normal; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LGW 减脂看板 🦞</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 30%, #FFB74D 60%, #0066CC 100%);
+    background-attachment: fixed;
+    color: #333366;
+    padding: 16px;
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 20% 20%, rgba(255, 183, 77, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(129, 199, 132, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(255, 183, 77, 0.08) 0%, transparent 50%);
+    z-index: -1;
+    animation: float 20s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(20px, -20px) rotate(1deg); }
+    66% { transform: translate(-10px, 15px) rotate(-1deg); }
+  }
 
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 30px 0 20px;
-            color: rgba(255,255,255,0.9);
-        }
-        .footer .brand-line {
-            font-size: 14px;
-            color: rgba(255,255,255,0.8);
-            margin-bottom: 6px;
-        }
-        .footer .thank-line {
-            font-size: 14px;
-            color: rgba(255,255,255,0.8);
-            margin-bottom: 12px;
-        }
-        .footer .motto-line {
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 20px;
-            letter-spacing: 1px;
-        }
-        .footer img {
-            width: 40%;
-            max-width: 588px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-    </style>
+  h1 {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 1.6em;
+    font-weight: 700;
+    background: linear-gradient(135deg, #FF7F00, #FFB74D, #0066CC);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glass {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+  }
+
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+  .stat-card {
+    padding: 16px 10px;
+    text-align: center;
+    transition: transform 0.2s ease;
+  }
+  .stat-card:hover { transform: translateY(-2px); }
+  .stat-card .label { font-size: 0.78em; color: #0066CC; font-weight: 500; letter-spacing: 0.5px; }
+  .stat-card .value {
+    font-size: 1.6em;
+    font-weight: 800;
+    margin-top: 4px;
+    background: linear-gradient(135deg, #FF7F00, #FF8C00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-card .value.accent {
+    background: linear-gradient(135deg, #4caf50, #81c784);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-card .sub { font-size: 0.72em; color: #004080; margin-top: 3px; }
+
+  .chart-container {
+    padding: 20px 16px;
+    margin: 16px 0;
+  }
+
+  .section-title {
+    font-size: 1.05em;
+    font-weight: 700;
+    color: #FF7F00;
+    margin: 24px 0 12px;
+    letter-spacing: 0.5px;
+  }
+
+  .weekly { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 10px 0; }
+  .week-card {
+    padding: 14px;
+    text-align: center;
+    transition: transform 0.2s ease;
+  }
+  .week-card:hover { transform: translateY(-2px); }
+  .week-card .wk { font-size: 0.78em; color: #0066CC; }
+  .week-card .wv {
+    font-size: 1.3em;
+    font-weight: 800;
+    background: linear-gradient(135deg, #FF7F00, #FF8C00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 4px 0;
+  }
+
+  .table-wrap {
+    padding: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 0 20px;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    background: linear-gradient(135deg, rgba(255, 127, 0, 0.85), rgba(255, 140, 0, 0.85));
+    backdrop-filter: blur(10px);
+    color: #fff;
+    padding: 12px 8px;
+    font-size: 0.82em;
+    text-align: center;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  td {
+    padding: 10px 8px;
+    text-align: center;
+    font-size: 0.84em;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    background: transparent;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255, 127, 0, 0.04); }
+
+  .weight-down { color: #27ae60; font-weight: 700; }
+  .weight-up { color: #e74c3c; font-weight: 700; }
+  .weight-same { color: #004080; }
+  .exercise-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, rgba(233,30,99,0.15), rgba(76,175,80,0.12));
+    color: #4caf50;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 0.75em;
+    font-weight: 500;
+    border: 1px solid rgba(233,30,99,0.15);
+  }
+
+  .footer {
+    text-align: center;
+    color: #0066CC;
+    font-size: 0.72em;
+    margin: 24px 0;
+    letter-spacing: 0.5px;
+  }
+  .footer .brand-line { font-size: 0.72em; color: #0066CC; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .footer .thank-line { font-size: 0.72em; color: #0066CC; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .footer .motto-line { font-size: 0.82em; font-weight: bold; color: #333; letter-spacing: 1px; margin-bottom: 16px; }
+  .footer .footer-logo { width: 40%; max-width: 588px; height: auto; display: block; margin: 0 auto; }
+
+
+  .progress-wrap { margin: 16px 0; padding: 16px 20px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 0.8em; color: #0066CC; margin-bottom: 8px; }
+  .progress-bar {
+    height: 10px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.15);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #FF8C00, #FF7F00, #4caf50);
+    transition: width 1s ease;
+    box-shadow: 0 2px 8px rgba(233,30,99,0.3);
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+    font-size: 1.1em;
+  }
+  .no-data .emoji { font-size: 3em; margin-bottom: 16px; }
+
+  /* Carousel */
+  .carousel-wrap { position: relative; overflow: hidden; margin: 10px 0; }
+  .carousel-track { display: flex; transition: transform 0.35s ease; touch-action: pan-y; }
+  .carousel-card { min-width: 100%; box-sizing: border-box; padding: 16px; }
+  .carousel-card .cc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .carousel-card .cc-meal { font-size: 1em; font-weight: 700; color: #FF7F00; }
+  .carousel-card .cc-cal { font-size: 0.9em; font-weight: 600; color: #0066CC; }
+  .carousel-card .cc-photo { width: 100%; border-radius: 12px; margin-bottom: 12px; object-fit: cover; max-height: 280px; }
+  .cc-collage { display: grid; gap: 4px; border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+  .cc-collage img { width: 100%; height: 100%; object-fit: cover; }
+  .cc-collage-2 { grid-template-columns: 1fr 1fr; aspect-ratio: 2/1; }
+  .cc-collage-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  .cc-collage-3 img:first-child { grid-row: 1/3; }
+  .cc-collage-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; aspect-ratio: 1; }
+  .carousel-card .cc-items { margin-bottom: 10px; }
+  .carousel-card .cc-item { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.85em; color: #333366; border-bottom: 1px solid rgba(233,30,99,0.06); }
+  .carousel-card .cc-item:last-child { border-bottom: none; }
+  .carousel-card .cc-macros { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .carousel-card .cc-macros span { background: rgba(233,30,99,0.08); padding: 3px 10px; border-radius: 8px; font-size: 0.78em; color: #0066CC; font-weight: 500; }
+  .carousel-dots { display: flex; justify-content: center; gap: 8px; padding: 12px 0; }
+  .carousel-dots .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(233,30,99,0.2); cursor: pointer; transition: all 0.2s; }
+  .carousel-dots .dot.active { background: #FF7F00; transform: scale(1.3); }
+  .carousel-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border-radius: 50%; background: rgba(233,30,99,0.15); border: none; color: #FF7F00; font-size: 1.1em; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; z-index: 2; }
+  .carousel-nav:hover { background: rgba(233,30,99,0.3); }
+  .carousel-nav.prev { left: 6px; }
+  .carousel-nav.next { right: 6px; }
+  .carousel-nav:disabled { opacity: 0.3; cursor: default; }
+  .no-meals { text-align: center; padding: 30px; color: #004080; font-size: 0.9em; }
+
+  /* Body comp tooltip */
+  .body-info { position: relative; display: inline; }
+  .body-info .info-icon { font-size: 0.65em; color: #FF7F00; cursor: pointer; vertical-align: super; margin-left: 2px; opacity: 0.7; }
+  .body-info .info-icon:hover { opacity: 1; }
+  .body-tip { display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: rgba(255,240,245,0.97); border: 1px solid rgba(233,30,99,0.15); border-radius: 10px; padding: 10px 14px; font-size: 0.75em; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,0.1); z-index: 10; color: #003366; line-height: 1.8; }
+  .body-tip.show { display: block; }
+  .body-tip .tip-row { display: flex; justify-content: space-between; gap: 16px; }
+  .body-tip .tip-label { color: #0066CC; font-weight: 500; }
+  .body-tip .tip-val { font-weight: 700; }
+
+  /* Tabs */
+  .tabs { display: flex; border-radius: 16px 16px 0 0; overflow: hidden; margin-top: 24px; margin-bottom: 0; border-bottom: none; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+  .tab { flex: 1; text-align: center; padding: 14px; font-size: 0.9em; font-weight: 600; color: #0066CC; cursor: pointer; transition: all 0.2s; background: rgba(255,255,255,0.3); }
+  .tab.active { background: rgba(255,255,255,0.6); color: #FF7F00; border-bottom: 2px solid #FF7F00; }
+  .tab:not(.active):hover { background: rgba(255,255,255,0.45); }
+  .tab-content { margin-bottom: 20px; }
+
+  /* Diet history */
+  .diet-day { margin: 8px 0; padding: 0; overflow: hidden; }
+  .diet-day-header { font-size: 0.9em; font-weight: 600; color: #0066CC; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+  .diet-day-header .day-cal { font-size: 0.85em; color: #FF7F00; font-weight: 600; }
+  .diet-day-header .toggle-icon { font-size: 0.8em; color: #FF7F00; transition: transform 0.2s; }
+  .diet-day-header .toggle-icon.open { transform: rotate(90deg); }
+  .diet-day-body { display: none; padding: 0 16px 16px; }
+  .diet-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .diet-gallery img { width: 100%; border-radius: 10px; object-fit: cover; aspect-ratio: 1; cursor: pointer; transition: transform 0.2s; }
+  .diet-gallery img:hover { transform: scale(1.03); }
+  .diet-detail-table { width: 100%; border-collapse: collapse; font-size: 0.8em; }
+  .diet-detail-table th { background: rgba(233,30,99,0.1); color: #0066CC; padding: 8px 6px; text-align: center; font-weight: 600; }
+  .diet-detail-table td { padding: 8px 6px; text-align: center; border-bottom: 1px solid rgba(233,30,99,0.06); }
+  .diet-detail-table tr:last-child td { border-bottom: none; font-weight: 700; color: #FF7F00; }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🦞 LGW 减脂看板</h1>
-        
-        <div class="card">
-            <h2>📊 当前状态</h2>
-            <div class="stats">
-                <div class="stat-item">
-                    <div class="stat-value">95.1</div>
-                    <div class="stat-label">当前体重 (kg)</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">75.0</div>
-                    <div class="stat-label">目标体重 (kg)</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">20.1</div>
-                    <div class="stat-label">待减重 (kg)</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">29.9</div>
-                    <div class="stat-label">BMI</div>
-                </div>
-            </div>
-        </div>
 
-        <div class="card">
-            <h2>📈 体重趋势</h2>
-            <canvas id="weightChart"></canvas>
-        </div>
-        
-        <div class="card">
-            <h2>🍽️ 今日饮食</h2>
-            <table>
-                <tr><th>餐次</th><th>内容</th><th>热量</th><th>蛋白</th><th>碳水</th><th>脂肪</th></tr>
-                <tr><td>午餐</td><td>鸡腿、紫米饭、炒白菜</td><td>~490</td><td>41g</td><td>46g</td><td>16g</td></tr>
-            </table>
-            <p style="margin-top:15px; font-size:14px; color:#666;">📅 最后更新：2026-05-25</p>
-        </div>
+<h1>⭐ LGW 的体重记录</h1>
 
-        <div class="card">
-            <h2>💊 补剂记录</h2>
-            <p>纽崔莱植物蛋白粉 · 沛源蛋白粉 · 倍立健</p>
-        </div>
+<div class="stats">
+  <div class="stat-card glass">
+    <div class="label">起始体重</div>
+    <div class="value" id="startW">--</div>
+    <div class="sub" id="startDate"></div>
+  </div>
+  <div class="stat-card glass">
+    <div class="label">今日体重</div>
+    <div class="value" id="currentW">--</div>
+    <div class="sub" id="currentDate"></div>
+  </div>
+  <div class="stat-card glass">
+    <div class="label">已减</div>
+    <div class="value" id="totalLoss">--</div>
+    <div class="sub" id="totalDays"></div>
+  </div>
+</div>
 
-        <!-- Footer -->
-        <div class="footer">
-            <div class="brand-line">虾教练·为LGW定制</div>
-            <div class="thank-line">感谢Xiaohan一直以来的支持与鼓励</div>
-            <div class="motto-line">让我们遇见更好的自己，帮人们过上更好的生活</div>
-            <img src="nglogo.png" alt="NG Logo">
-        </div>
+<div class="stats">
+  <div class="stat-card glass">
+    <div class="label">目标</div>
+    <div class="value accent" id="goalW">--</div>
+    <div class="sub" id="goalDate"></div>
+  </div>
+  <div class="stat-card glass">
+    <div class="label">距目标</div>
+    <div class="value accent" id="toGoal">--</div>
+    <div class="sub">还差</div>
+  </div>
+  <div class="stat-card glass">
+    <div class="label">周均减重</div>
+    <div class="value" id="weeklyAvg">--</div>
+    <div class="sub">kg/周</div>
+  </div>
+</div>
+
+<div class="progress-wrap glass">
+  <div class="progress-label">
+    <span id="pStart">--</span>
+    <span id="pPercent">0%</span>
+    <span id="pGoal">--</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+  </div>
+</div>
+
+<div class="chart-container glass-strong">
+  <canvas id="weightChart" height="200"></canvas>
+</div>
+
+<div class="section-title">🍽️ 今日饮食</div>
+<div class="today-summary glass-strong" id="todaySummary" style="display:none; padding:16px; margin:10px 0;">
+  <div class="stats" style="margin:0;">
+    <div class="stat-card" style="padding:10px;">
+      <div class="label">总热量</div>
+      <div class="value" id="todayCal">--</div>
+      <div class="sub"><span id="todayCalTarget"></span></div>
     </div>
+    <div class="stat-card" style="padding:10px;">
+      <div class="label">蛋白质</div>
+      <div class="value" id="todayP">--</div>
+      <div class="sub"><span id="todayPTarget"></span></div>
+    </div>
+    <div class="stat-card" style="padding:10px;">
+      <div class="label">碳水</div>
+      <div class="value" id="todayC">--</div>
+      <div class="sub"><span id="todayCTarget"></span></div>
+    </div>
+  </div>
+  <div class="stats" style="margin:8px 0 0;">
+    <div class="stat-card" style="padding:10px;">
+      <div class="label">脂肪</div>
+      <div class="value" id="todayF">--</div>
+      <div class="sub"><span id="todayFTarget"></span></div>
+    </div>
+    <div class="stat-card" style="padding:10px;">
+      <div class="label">纤维</div>
+      <div class="value" id="todayFiber">--</div>
+      <div class="sub">g</div>
+    </div>
+    <div class="stat-card" style="padding:10px;">
+      <div class="label">餐次</div>
+      <div class="value" id="todayCount">--</div>
+      <div class="sub">次</div>
+    </div>
+  </div>
+</div>
+<div class="carousel-wrap" id="todayCarousel">
+  <div class="carousel-track" id="todayTrack"></div>
+  <div class="carousel-dots" id="todayDots"></div>
+</div>
 
-    <script>
-        const ctx = document.getElementById('weightChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['05-25'],
-                datasets: [{
-                    label: '体重 (kg)',
-                    data: [95.1],
-                    borderColor: '#FF6600',
-                    backgroundColor: 'rgba(255, 102, 0, 0.1)',
-                    fill: true,
-                    tension: 0.3
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        suggestedMin: 70,
-                        suggestedMax: 100
-                    }
-                }
+<div class="tabs glass-strong">
+  <div class="tab active" data-tab="weight">📋 每日明细</div>
+  <div class="tab" data-tab="diet">🍽️ 每日饮食</div>
+</div>
+
+<div class="tab-content" id="tab-weight">
+<div class="table-wrap glass-strong" style="margin-top:0; border-top-left-radius:0; border-top-right-radius:0;">
+<table>
+  <thead>
+    <tr><th>日期</th><th>星期</th><th>体重</th><th>变化</th><th>运动</th><th>备注</th></tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
+</div>
+</div>
+
+<div class="tab-content" id="tab-diet" style="display:none;">
+<div id="dietHistory"></div>
+</div>
+
+<div class="section-title">📊 每周汇总</div>
+<div class="weekly" id="weeklyCards"></div>
+
+<div class="footer">
+  <div class="brand-line">虾教练·为LGW定制</div>
+  <div class="thank-line">感谢Xiaohan一直以来的支持与鼓励</div>
+  <div class="motto-line">让我们遇见更好的自己，帮人们过上更好的生活</div>
+  <img src="nglogo.png" alt="NG Logo" class="footer-logo">
+</div>
+
+<script>
+// ===== LGW 的数据 =====
+// 每次更新在这里添加记录即可
+
+// Daily targets
+const DAILY_TARGET = { cal: 1750, protein: 160, carbs: 165, fat: 50 };
+function f(n) { return Number(n).toFixed(1); }
+const MEALS = [
+  { date: '2026-04-08', meal: '早餐 9:00', items: '南航空厨混合坚果 25g', photo: 'photos/2026-04-08_零食_混合坚果.jpg', cal: 140, protein: 4, carbs: 8, fat: 10, fiber: 1.5 },
+  { date: '2026-04-08', meal: '早餐 9:00', items: '生可可燕麦高纤GI饼干 ~30g', photo: 'photos/2026-04-08_零食_高纤饼干.jpg', cal: 135, protein: 2, carbs: 20, fat: 5, fiber: 3 },
+  { date: '2026-04-08', meal: '早餐 9:00', items: '大杯美式咖啡（黑）', photo: '', cal: 15, protein: 0.5, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-08', meal: '午餐 13:00', items: '鸡大胸一整块（蛋+盐+白胡椒腌）~250g', photo: 'photos/2026-04-08_午餐_鸡胸莴笋胡萝卜.jpg', cal: 360, protein: 61, carbs: 0.5, fat: 11, fiber: 0 },
+  { date: '2026-04-08', meal: '午餐 13:00', items: '莴笋一颗 ~300g', photo: '', cal: 45, protein: 3, carbs: 8, fat: 0.5, fiber: 2 },
+  { date: '2026-04-08', meal: '午餐 13:00', items: '胡萝卜一个 ~150g', photo: '', cal: 60, protein: 1.5, carbs: 14, fat: 0.3, fiber: 4 },
+  { date: '2026-04-08', meal: '午餐 13:00', items: '少量橄榄油 ~10ml', photo: '', cal: 80, protein: 0, carbs: 0, fat: 9, fiber: 0 },
+  { date: '2026-04-08', meal: '午餐 13:00', items: '白米饭一碗 ~200g', photo: '', cal: 230, protein: 4, carbs: 50, fat: 0.5, fiber: 0.5 },
+  { date: '2026-04-08', meal: '晚餐 20:30', items: '豆腐 200g', photo: 'photos/2026-04-08_晚餐_成品.jpg', cal: 144, protein: 16, carbs: 4, fat: 8, fiber: 0 },
+  { date: '2026-04-08', meal: '晚餐 20:30', items: '金针菇 120g', photo: 'photos/2026-04-08_晚餐_食材.jpg', cal: 44, protein: 3, carbs: 8, fat: 0.2, fiber: 2 },
+  { date: '2026-04-08', meal: '晚餐 20:30', items: '豆芽 100g', photo: '', cal: 15, protein: 1.8, carbs: 2, fat: 0.1, fiber: 1 },
+  { date: '2026-04-08', meal: '晚餐 20:30', items: '大白菜→娃娃菜 230g', photo: '', cal: 30, protein: 3, carbs: 5, fat: 0.2, fiber: 2 },
+  { date: '2026-04-08', meal: '晚餐 20:30', items: '西红柿 ~150g', photo: '', cal: 27, protein: 1.3, carbs: 6, fat: 0.3, fiber: 1.5 },
+  { date: '2026-04-08', meal: '晚餐 20:30', items: '鸡蛋 2个', photo: '', cal: 140, protein: 12, carbs: 1, fat: 10, fiber: 0 },
+  { date: '2026-04-08', meal: '晚餐 20:30', items: '少量橄榄油 ~10ml', photo: '', cal: 80, protein: 0, carbs: 0, fat: 9, fiber: 0 },
+  { date: '2026-04-08', meal: '晚餐 20:30', items: '料汁（生抽+老抽+蚝油+盐+白胡椒）', photo: '', cal: 25, protein: 1, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-04-08', meal: '晚餐 20:30', items: '白米饭 96g（熟重）', photo: '', cal: 112, protein: 2, carbs: 25, fat: 0.3, fiber: 0.2 },
+  { date: '2026-04-08', meal: '补剂', items: '纽崔莱植物蛋白粉 2勺', photo: '', cal: 70, protein: 16, carbs: 2, fat: 1, fiber: 0 },
+  { date: '2026-04-08', meal: '补剂', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-09', meal: '早餐 10:30', items: '香蕉蛋白奶昔（植物蛋白粉2勺+香蕉1根+水）', photo: 'photos/2026-04-09_早餐_奶昔鸡蛋.jpg', cal: 177, protein: 17.3, carbs: 29, fat: 1.3, fiber: 1.5 },
+  { date: '2026-04-09', meal: '早餐 10:30', items: '水煮鸡蛋 1颗', photo: '', cal: 70, protein: 6, carbs: 0.5, fat: 5, fiber: 0 },
+  { date: '2026-04-09', meal: '早餐 10:30', items: '纽崔莱倍立健 1对+钙镁片 1对', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-09', meal: '午餐 13:00', items: '恰巴塔面包 100g', photo: 'photos/2026-04-09_午餐_三文鱼恰巴塔.jpg', cal: 233, protein: 9.1, carbs: 45.5, fat: 1.3, fiber: 2.2 },
+  { date: '2026-04-09', meal: '午餐 13:00', items: '生三文鱼丁 90g', photo: '', cal: 170, protein: 18, carbs: 0, fat: 11, fiber: 0 },
+  { date: '2026-04-09', meal: '午餐 13:00', items: '无糖希腊酸奶 80g', photo: '', cal: 45, protein: 8, carbs: 2.5, fat: 0.5, fiber: 0 },
+  { date: '2026-04-09', meal: '午餐 13:00', items: '水煮鸡蛋 2个', photo: '', cal: 140, protein: 12, carbs: 1, fat: 10, fiber: 0 },
+  { date: '2026-04-09', meal: '午餐 13:00', items: '黄瓜 1根盐杀刨丝 ~200g', photo: '', cal: 30, protein: 1.3, carbs: 7, fat: 0.2, fiber: 1 },
+  { date: '2026-04-09', meal: '午餐 13:00', items: '配料（蒜末+泡椒+蜂蜜+芝麻+黄芥末+芥末）', photo: '', cal: 43, protein: 0.5, carbs: 7, fat: 1.3, fiber: 0 },
+  { date: '2026-04-09', meal: '午餐 13:00', items: '热美式咖啡', photo: '', cal: 15, protein: 0.5, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-09', meal: '午餐 13:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-09', meal: '午餐 13:00', items: '益生菌 Body Lift 1条', photo: '', cal: 5, protein: 0, carbs: 1, fat: 0, fiber: 0 },
+  { date: '2026-04-09', meal: '午餐 13:00', items: '衡怡饮品 1条', photo: '', cal: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-09', meal: '加餐 17:00', items: '香蕉 1根 ~120g', photo: '', cal: 107, protein: 1.3, carbs: 27, fat: 0.3, fiber: 1.5 },
+  { date: '2026-04-09', meal: '晚餐 19:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-09', meal: '晚餐 19:50', items: '西红柿炒蛋（鸡蛋2个+西红柿1颗）', photo: 'photos/2026-04-09_晚餐_西红柿炒蛋盖饭.jpg', cal: 247, protein: 13.3, carbs: 7, fat: 19.3, fiber: 1 },
+  { date: '2026-04-09', meal: '晚餐 19:50', items: '娃娃菜 ~250g', photo: '', cal: 33, protein: 3, carbs: 5, fat: 0.2, fiber: 2 },
+  { date: '2026-04-09', meal: '晚餐 19:50', items: '胡萝卜 1根 ~150g', photo: '', cal: 60, protein: 1.5, carbs: 14, fat: 0.3, fiber: 4 },
+  { date: '2026-04-09', meal: '晚餐 19:50', items: '豆腐 200g', photo: '', cal: 144, protein: 16, carbs: 4, fat: 8, fiber: 0 },
+  { date: '2026-04-09', meal: '晚餐 19:50', items: '米饭 75g（熟重）', photo: '', cal: 88, protein: 1.5, carbs: 19, fat: 0.2, fiber: 0 },
+  { date: '2026-04-09', meal: '晚餐 19:50', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-09', meal: '晚餐 19:50', items: '益生菌 Body Lift 1条', photo: '', cal: 5, protein: 0, carbs: 1, fat: 0, fiber: 0 },
+  { date: '2026-04-09', meal: '晚餐 19:50', items: '衡怡饮品 1条', photo: '', cal: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-10', meal: '早餐 10:00', items: '奶昔（植物蛋白粉2勺+小芒果1个+半根香蕉+希腊酸奶12g+水）', photo: 'photos/2026-04-10_早餐_芒果奶昔.jpg', cal: 162, protein: 17.5, carbs: 22, fat: 1.5, fiber: 2 },
+  { date: '2026-04-10', meal: '早餐 10:00', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-10', meal: '午餐 11:30', items: '牛里脊 195g（65%份）', photo: 'photos/2026-04-10_午餐_番茄牛肉炖菜.jpg', cal: 215, protein: 41, carbs: 0, fat: 4.9, fiber: 0 },
+  { date: '2026-04-10', meal: '午餐 11:30', items: '娃娃菜 325g', photo: '', cal: 42, protein: 3.9, carbs: 6.5, fat: 0.3, fiber: 3 },
+  { date: '2026-04-10', meal: '午餐 11:30', items: '金针菇 98g', photo: '', cal: 35, protein: 2.5, carbs: 6.5, fat: 0.1, fiber: 2 },
+  { date: '2026-04-10', meal: '午餐 11:30', items: '番茄丁罐头 130g + 鲜西红柿 65%', photo: '', cal: 47, protein: 2.1, carbs: 9.8, fat: 0.3, fiber: 1 },
+  { date: '2026-04-10', meal: '午餐 11:30', items: '胡萝卜 65% ~97g', photo: '', cal: 39, protein: 1, carbs: 9.1, fat: 0.2, fiber: 2 },
+  { date: '2026-04-10', meal: '午餐 11:30', items: '蛋清+料汁（65%份）', photo: '', cal: 44, protein: 3, carbs: 3.9, fat: 0.7, fiber: 0 },
+  { date: '2026-04-10', meal: '午餐 11:30', items: '三色糙米饭 100g（熟）', photo: '', cal: 110, protein: 2.5, carbs: 23, fat: 0.8, fiber: 1.5 },
+  { date: '2026-04-10', meal: '加餐 13:50', items: '茉莉花香冰美式（大杯·无糖）', photo: '', cal: 40, protein: 0.5, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-10', meal: '晚餐 18:00', items: '杂粮饭 ~150g', photo: 'photos/2026-04-10_晚餐_金枪鱼便当.jpg', cal: 175, protein: 4, carbs: 36, fat: 1, fiber: 2 },
+  { date: '2026-04-10', meal: '晚餐 18:00', items: '金枪鱼 ~80g + 海苔芝麻', photo: '', cal: 100, protein: 18.5, carbs: 1, fat: 2.5, fiber: 0 },
+  { date: '2026-04-10', meal: '晚餐 18:00', items: '水煮蛋 2个', photo: '', cal: 140, protein: 12, carbs: 1, fat: 10, fiber: 0 },
+  { date: '2026-04-10', meal: '晚餐 18:00', items: '烫青菜 ~150g', photo: '', cal: 25, protein: 2, carbs: 3, fat: 0.3, fiber: 2 },
+  { date: '2026-04-10', meal: '晚餐 18:00', items: '番茄酱汁', photo: '', cal: 20, protein: 0.5, carbs: 4, fat: 0.2, fiber: 0 },
+  { date: '2026-04-10', meal: '晚餐 18:00', items: '凉拌菜小碗', photo: '', cal: 50, protein: 2, carbs: 8, fat: 1.5, fiber: 2 },
+  { date: '2026-04-10', meal: '晚餐 18:00', items: '新奥尔良鸡腿排 半份', photo: '', cal: 140, protein: 11, carbs: 6, fat: 8, fiber: 0 },
+  { date: '2026-04-10', meal: '晚餐 18:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-10', meal: '晚餐 18:00', items: '益生菌 Body Lift 1条', photo: '', cal: 5, protein: 0, carbs: 1, fat: 0, fiber: 0 },
+  { date: '2026-04-10', meal: '晚餐 18:00', items: '衡怡饮品 1条', photo: '', cal: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-10', meal: '晚餐 18:00', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-11', meal: '早餐 11:00', items: '奶昔（植物蛋白粉2勺+香蕉1根+水）', photo: 'photos/2026-04-11_早餐_香蕉奶昔.jpg', cal: 179, protein: 17.3, carbs: 28, fat: 1.3, fiber: 2.5 },
+  { date: '2026-04-11', meal: '早餐 11:00', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-11', meal: '午餐 14:00', items: '牛肉汤（牛肉~150g+白萝卜+牛骨汤底）', photo: 'photos/2026-04-11_午餐_牛肉汤饭.jpg', cal: 238, protein: 32.7, carbs: 4, fat: 9.1, fiber: 1 },
+  { date: '2026-04-11', meal: '午餐 14:00', items: '白米饭 ~200g', photo: '', cal: 230, protein: 4.6, carbs: 51, fat: 0.5, fiber: 0 },
+  { date: '2026-04-11', meal: '午餐 14:00', items: '蒜蓉青菜 ~200g', photo: '', cal: 65, protein: 3, carbs: 5, fat: 4, fiber: 3 },
+  { date: '2026-04-11', meal: '午餐 14:00', items: '芝麻酱蘸料 ~10g', photo: '', cal: 63, protein: 2, carbs: 1, fat: 6, fiber: 0 },
+  { date: '2026-04-11', meal: '午餐 14:00', items: '煎蛋 1个', photo: '', cal: 90, protein: 6, carbs: 0.5, fat: 7, fiber: 0 },
+  { date: '2026-04-11', meal: '晚餐 18:30', items: '虾滑 105g + 娃娃菜 238g（70%）', photo: 'photos/2026-04-11_晚餐_虾滑娃娃菜.jpg', cal: 98, protein: 17.1, carbs: 6, fat: 0.2, fiber: 2.1 },
+  { date: '2026-04-11', meal: '晚餐 18:30', items: '西红柿炒蛋 70%（2.1蛋+1.4西红柿）', photo: '', cal: 227, protein: 14.4, carbs: 9.5, fat: 15.1, fiber: 1.4 },
+  { date: '2026-04-11', meal: '晚餐 18:30', items: '炒菜油 70% ~3.5g', photo: '', cal: 32, protein: 0, carbs: 0, fat: 3.5, fiber: 0 },
+  { date: '2026-04-11', meal: '晚餐 18:30', items: '三色糙米饭 ~84g（熟·70%）', photo: '', cal: 92, protein: 2.1, carbs: 19.3, fat: 0.7, fiber: 1.3 },
+  { date: '2026-04-11', meal: '晚餐 19:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-11', meal: '晚餐 19:00', items: '益生菌 Body Lift 1条', photo: '', cal: 5, protein: 0, carbs: 1, fat: 0, fiber: 0 },
+  { date: '2026-04-11', meal: '晚餐 19:00', items: '衡怡饮品 1条', photo: '', cal: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-11', meal: '晚餐 19:00', items: '葆芯饮品 2条', photo: '', cal: 20, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-11', meal: '晚餐 19:00', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-11', meal: '加餐 23:00', items: '霞多丽白葡萄酒 1杯 ~150ml', photo: '', cal: 120, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-04-12', meal: '早餐 08:00', items: '奶昔（植物蛋白粉2勺+香蕉1根+水）', photo: 'photos/2026-04-12_早餐_香蕉奶昔.jpg', cal: 179, protein: 17.3, carbs: 28, fat: 1.3, fiber: 2.5 },
+  { date: '2026-04-12', meal: '早餐 08:00', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-12', meal: '午餐 13:00', items: '三文鱼 ~80g + 海苔芝麻', photo: 'photos/2026-04-12_午餐_三文鱼饭.jpg', cal: 175, protein: 17, carbs: 1, fat: 11, fiber: 0 },
+  { date: '2026-04-12', meal: '午餐 13:00', items: '煎蛋 1个', photo: '', cal: 90, protein: 6, carbs: 0.5, fat: 7, fiber: 0 },
+  { date: '2026-04-12', meal: '午餐 13:00', items: '毛豆 ~50g', photo: '', cal: 60, protein: 5, carbs: 3, fat: 2.5, fiber: 2 },
+  { date: '2026-04-12', meal: '午餐 13:00', items: '糙米饭 ~150g', photo: '', cal: 175, protein: 4, carbs: 36, fat: 0.5, fiber: 1.5 },
+  { date: '2026-04-12', meal: '午餐 13:00', items: '照烧肉 ~60g', photo: '', cal: 117, protein: 10, carbs: 5, fat: 6, fiber: 0 },
+  { date: '2026-04-12', meal: '午餐 13:00', items: '烫青菜 ~100g', photo: '', cal: 20, protein: 2, carbs: 2, fat: 0.2, fiber: 2 },
+  { date: '2026-04-12', meal: '午餐 13:00', items: '无糖百事可乐', photo: '', cal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-12', meal: '午餐 13:00', items: '加半份鸡腿肉', photo: '', cal: 120, protein: 12, carbs: 0, fat: 7, fiber: 0 },
+  { date: '2026-04-12', meal: '午餐 13:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-12', meal: '午餐 13:00', items: '益生菌 Body Lift 1条', photo: '', cal: 5, protein: 0, carbs: 1, fat: 0, fiber: 0 },
+  { date: '2026-04-12', meal: '午餐 13:00', items: '衡怡饮品 1条', photo: '', cal: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-12', meal: '午餐 13:00', items: '葆芯饮品 2条', photo: '', cal: 20, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-12', meal: '晚餐 19:30', items: '白斩鸡腿 半份（~95g肉）', photo: 'photos/2026-04-12_晚餐_白斩鸡番茄炖菜.jpg', cal: 159, protein: 18, carbs: 0, fat: 9, fiber: 0 },
+  { date: '2026-04-12', meal: '晚餐 19:30', items: '牛里脊 50g', photo: '', cal: 55, protein: 10.5, carbs: 0, fat: 1.3, fiber: 0 },
+  { date: '2026-04-12', meal: '晚餐 19:30', items: '娃娃菜 112g + 土豆 72g + 海鲜菇 98g', photo: '', cal: 101, protein: 4.9, carbs: 19.3, fat: 0.3, fiber: 4 },
+  { date: '2026-04-12', meal: '晚餐 19:30', items: '西红柿 92g + 番茄丁罐头 100g', photo: '', cal: 39, protein: 1.9, carbs: 8.2, fat: 0.2, fiber: 1 },
+  { date: '2026-04-12', meal: '晚餐 19:30', items: '三色糙米饭 123g（熟）', photo: '', cal: 135, protein: 2.8, carbs: 27, fat: 0.8, fiber: 1.8 },
+  { date: '2026-04-12', meal: '晚餐 19:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-12', meal: '晚餐 19:30', items: '益生菌 Body Lift 1条', photo: '', cal: 5, protein: 0, carbs: 1, fat: 0, fiber: 0 },
+  { date: '2026-04-12', meal: '晚餐 19:30', items: '衡怡饮品 1条', photo: '', cal: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-12', meal: '晚餐 19:30', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-13', meal: '早餐 08:30', items: '奶昔（植物蛋白粉2勺+香蕉1根+水）', photo: 'photos/2026-04-13_早餐_香蕉奶昔.jpg', cal: 179, protein: 17.3, carbs: 28, fat: 1.3, fiber: 2.5 },
+  { date: '2026-04-13', meal: '早餐 08:30', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-13', meal: '午餐 12:00', items: '煲仔饭（鸡腿肉+香菇+玉米+胡萝卜+鸡蛋+米饭+煲仔汁）', photo: 'photos/2026-04-13_午餐_煲仔饭.jpg', cal: 597, protein: 31, carbs: 70.5, fat: 14.1, fiber: 2 },
+  { date: '2026-04-13', meal: '午餐 12:00', items: '罗马生菜 半份 ~100g', photo: '', cal: 30, protein: 1.5, carbs: 3, fat: 1.5, fiber: 1.5 },
+  { date: '2026-04-13', meal: '加餐 15:30', items: '纽崔莱沛源蛋白粉 2勺+水', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-13', meal: '加餐 17:00', items: '蚕豆咸肉恰巴塔 半个', photo: '', cal: 190, protein: 7, carbs: 24, fat: 7, fiber: 1 },
+  { date: '2026-04-13', meal: '加餐 17:00', items: '热美式咖啡 1杯', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-13', meal: '晚餐 20:00', items: '柠檬酱油炒鸡腿肉（去皮去骨）378g', photo: 'photos/2026-04-13_晚餐_鸡腿肉花菜.jpg', cal: 535, protein: 76.1, carbs: 2, fat: 14.5, fiber: 0 },
+  { date: '2026-04-13', meal: '晚餐 20:00', items: '清炒白花菜 375g', photo: '', cal: 139, protein: 7.5, carbs: 15, fat: 5.4, fiber: 7.5 },
+  { date: '2026-04-13', meal: '晚餐 20:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-13', meal: '晚餐 20:00', items: '益生菌 Body Lift 1条', photo: '', cal: 5, protein: 0, carbs: 1, fat: 0, fiber: 0 },
+  { date: '2026-04-13', meal: '晚餐 20:00', items: '衡怡饮品 1条', photo: '', cal: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-13', meal: '晚餐 20:00', items: '葆芯饮品 2条', photo: '', cal: 20, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-13', meal: '晚餐 20:00', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-14', meal: '早餐 10:00', items: '奶昔（植物蛋白粉2勺+香蒉1根+水）', photo: '', cal: 179, protein: 17.3, carbs: 28, fat: 1.3, fiber: 2.5 },
+  { date: '2026-04-14', meal: '早餐 10:00', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-14', meal: '午餐 12:30', items: '三文鱼220g+希腊酸奶65.6g+黄瓜沙拉', photo: 'photos/2026-04-14_午餐_三文鱼沙拉.jpg', cal: 537, protein: 50.6, carbs: 7, fat: 26.7, fiber: 1 },
+  { date: '2026-04-14', meal: '午餐 12:30', items: '凉拌芦笋丝 200g', photo: '', cal: 72, protein: 5, carbs: 5, fat: 3.2, fiber: 2 },
+  { date: '2026-04-14', meal: '午餐 12:30', items: '全麦恰巴塔 1个（倪锦记）', photo: '', cal: 230, protein: 8, carbs: 40, fat: 3, fiber: 3 },
+  { date: '2026-04-14', meal: '午餐 12:30', items: '热美式咖啡 1杯', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-14', meal: '午餐 12:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-14', meal: '午餐 12:30', items: '益生菌 Body Lift 1条', photo: '', cal: 5, protein: 0, carbs: 1, fat: 0, fiber: 0 },
+  { date: '2026-04-14', meal: '午餐 12:30', items: '衡怡饮品 1条', photo: '', cal: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-14', meal: '晚餐 17:50', items: '柠檬黑胡椒煎虾 300g（净重）', photo: 'photos/2026-04-14_晚餐_柠檬黑胡椒虾.jpg', cal: 230, protein: 40, carbs: 0, fat: 7, fiber: 0 },
+  { date: '2026-04-14', meal: '晚餐 17:50', items: '清炒莴笋丝 220g', photo: '', cal: 62, protein: 2.2, carbs: 5, fat: 3.2, fiber: 2 },
+  { date: '2026-04-14', meal: '晚餐 17:50', items: '蛕豆咸肉恰巴塔 55g', photo: '', cal: 105, protein: 4, carbs: 13, fat: 4, fiber: 0.5 },
+  { date: '2026-04-14', meal: '晚餐 17:50', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-14', meal: '晚餐 17:50', items: '益生菌 Body Lift 1条', photo: '', cal: 5, protein: 0, carbs: 1, fat: 0, fiber: 0 },
+  { date: '2026-04-14', meal: '晚餐 17:50', items: '衡怡饮品 1条', photo: '', cal: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-14', meal: '晚餐 17:50', items: '葆芯饮品 2条', photo: '', cal: 20, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-14', meal: '晚餐 17:50', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-14', meal: '宵夜 01:00', items: '烧烤串 ~8串（羊肉/牛肉）', photo: 'photos/2026-04-14_宵夜_烧烤啡酒.jpg', cal: 400, protein: 32, carbs: 5, fat: 28, fiber: 0 },
+  { date: '2026-04-14', meal: '宵夜 01:00', items: '水煮花生 3-4个', photo: '', cal: 45, protein: 3, carbs: 2, fat: 3, fiber: 0.5 },
+  { date: '2026-04-14', meal: '宵夜 01:00', items: '哈尔滨啡酒 1瓶', photo: '', cal: 130, protein: 1, carbs: 10, fat: 0, fiber: 0 },
+  { date: '2026-04-15', meal: '早餐 12:00', items: '奶昔（植物蛋白粉2勺+香蒉1根+水）', photo: '', cal: 179, protein: 17.3, carbs: 28, fat: 1.3, fiber: 2.5 },
+  { date: '2026-04-15', meal: '早餐 12:00', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-15', meal: '午餐 13:20', items: '山野藤椒鸡肉饭（含煎蛋+青菜+米饭）', photo: 'photos/2026-04-15_午餐_藤椒鸡肉饭.jpg', cal: 578, protein: 28, carbs: 65, fat: 22, fiber: 2 },
+  { date: '2026-04-15', meal: '午餐 13:20', items: '嫩烤鸡腿肉 4块 ~160g', photo: '', cal: 210, protein: 28, carbs: 3, fat: 10, fiber: 0 },
+  { date: '2026-04-15', meal: '午餐 13:20', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-15', meal: '晚餐 20:00', items: '石锅鱼肉（奶白汤底）~375g', photo: 'photos/2026-04-15_晚餐_石锅鱼.jpg', cal: 380, protein: 68, carbs: 0, fat: 12, fiber: 0 },
+  { date: '2026-04-15', meal: '晚餐 20:00', items: '奶白汤底', photo: '', cal: 80, protein: 2, carbs: 2, fat: 7, fiber: 0 },
+  { date: '2026-04-15', meal: '晚餐 20:00', items: '娃娃菜+生菜 半份 ~250g', photo: '', cal: 33, protein: 3, carbs: 5, fat: 0.4, fiber: 3 },
+  { date: '2026-04-15', meal: '晚餐 20:00', items: '蘸料', photo: '', cal: 30, protein: 0.5, carbs: 2, fat: 2, fiber: 0 },
+  { date: '2026-04-15', meal: '晚餐 20:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-15', meal: '晚餐 20:00', items: '益生菌 Body Lift 1条', photo: '', cal: 5, protein: 0, carbs: 1, fat: 0, fiber: 0 },
+  { date: '2026-04-15', meal: '晚餐 20:00', items: '衡怡饮品 1条', photo: '', cal: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-15', meal: '晚餐 20:00', items: '葆芯饮品 2条', photo: '', cal: 20, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-15', meal: '晚餐 20:00', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-16', meal: '早餐 10:30', items: 'BodyKey乐纤代餐（馥郁莓果）1包+香蒉1根+水', photo: 'photos/2026-04-16_早餐_代餐奶昔.jpg', cal: 239, protein: 17.1, carbs: 37, fat: 2.8, fiber: 7 },
+  { date: '2026-04-16', meal: '早餐 10:30', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-16', meal: '午餐 11:30', items: '涑牵肉片 200g（关东煮清汤）', photo: 'photos/2026-04-16_午餐_关东煮牛肉.jpg', cal: 220, protein: 42, carbs: 0, fat: 5, fiber: 0 },
+  { date: '2026-04-16', meal: '午餐 11:30', items: '白萝卜+豌豆尖+娃娃菜 半份', photo: '', cal: 62, protein: 5, carbs: 10.6, fat: 0.5, fiber: 3 },
+  { date: '2026-04-16', meal: '午餐 11:30', items: '海鲜汁蘸料', photo: '', cal: 25, protein: 1, carbs: 3, fat: 1, fiber: 0 },
+  { date: '2026-04-16', meal: '加餐', items: '风干鸡肉干 ~45g', photo: '', cal: 135, protein: 22, carbs: 5, fat: 3, fiber: 0 },
+  { date: '2026-04-16', meal: '午餐 11:30', items: '汤底', photo: '', cal: 30, protein: 1, carbs: 3, fat: 1, fiber: 0 },
+  { date: '2026-04-16', meal: '午餐 11:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-16', meal: '午餐 11:30', items: '益生菌 Body Lift 1条', photo: '', cal: 5, protein: 0, carbs: 1, fat: 0, fiber: 0 },
+  { date: '2026-04-16', meal: '午餐 11:30', items: '衡怡饮品 1条', photo: '', cal: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-16', meal: '晚餐 19:45', items: '柠檬鸡腿肉（去皮）半份 ~300g', photo: 'photos/2026-04-16_晚餐_柠檬鸡腿肉.jpg', cal: 430, protein: 60, carbs: 2, fat: 20, fiber: 0 },
+  { date: '2026-04-16', meal: '晚餐 19:45', items: '螂油生菜 半份 ~150g', photo: '', cal: 35, protein: 1.5, carbs: 4, fat: 1.5, fiber: 1.5 },
+  { date: '2026-04-16', meal: '晚餐 19:45', items: '全麦吐司 2片 80g', photo: '', cal: 195, protein: 7, carbs: 32, fat: 3, fiber: 3 },
+  { date: '2026-04-16', meal: '晚餐 19:45', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-16', meal: '晚餐 19:45', items: '益生菌 Body Lift 1条', photo: '', cal: 5, protein: 0, carbs: 1, fat: 0, fiber: 0 },
+  { date: '2026-04-16', meal: '晚餐 19:45', items: '衡怡饮品 1条', photo: '', cal: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-16', meal: '晚餐 19:45', items: '葆芯饮品 2条', photo: '', cal: 20, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-16', meal: '晚餐 19:45', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-17', meal: '早餐 09:30', items: 'BodyKey乐纤代餐+香蒉1根+水', photo: '', cal: 239, protein: 17.1, carbs: 37, fat: 2.8, fiber: 7 },
+  { date: '2026-04-17', meal: '早餐 09:30', items: '全麦法棍夹煎蛋 20g+1蛋', photo: '', cal: 140, protein: 8, carbs: 10, fat: 8, fiber: 0.5 },
+  { date: '2026-04-17', meal: '早餐 09:30', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-17', meal: '午餐 14:00', items: '卡盐蜡牛肉 200g', photo: '', cal: 280, protein: 52, carbs: 2, fat: 8, fiber: 0 },
+  { date: '2026-04-17', meal: '午餐 14:00', items: '全麦法棍 100g', photo: '', cal: 250, protein: 9, carbs: 46, fat: 2, fiber: 2 },
+  { date: '2026-04-17', meal: '午餐 14:00', items: '黄瓜 1根 ~200g', photo: '', cal: 24, protein: 1.4, carbs: 4, fat: 0.2, fiber: 1 },
+  { date: '2026-04-17', meal: '午餐 14:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-17', meal: '午餐 14:00', items: '葆芯饮品 2条', photo: '', cal: 20, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-17', meal: '午餐 14:00', items: '衡怡饮品 1条', photo: '', cal: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-17', meal: '午餐 14:00', items: '益生菌 Body Lift 1条', photo: '', cal: 5, protein: 0, carbs: 1, fat: 0, fiber: 0 },
+  { date: '2026-04-17', meal: '晚餐 19:00', items: '京味烧鸡（带骨300g，肉~190g）', photo: '', cal: 310, protein: 36, carbs: 3, fat: 15, fiber: 0 },
+  { date: '2026-04-17', meal: '晚餐 19:00', items: '全麦吐司 3片 120g', photo: '', cal: 293, protein: 15, carbs: 48, fat: 4.5, fiber: 3 },
+  { date: '2026-04-17', meal: '晚餐 19:00', items: '黄瓜 2根 ~400g', photo: '', cal: 48, protein: 2.8, carbs: 8, fat: 0.4, fiber: 2 },
+  { date: '2026-04-17', meal: '晚餐 19:00', items: '风干鸡肉干 30g', photo: '', cal: 90, protein: 15, carbs: 3, fat: 2, fiber: 0 },
+  { date: '2026-04-17', meal: '晚餐 19:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-17', meal: '晚餐 19:00', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-17', meal: '晚餐 19:00', items: '益生菌 Body Lift 1条', photo: '', cal: 5, protein: 0, carbs: 1, fat: 0, fiber: 0 },
+  { date: '2026-04-17', meal: '晚餐 19:00', items: '衡怡饮品 1条', photo: '', cal: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-18', meal: '早餐 05:00', items: 'BodyKey乐纤代餐+香蒉1根+水', photo: '', cal: 239, protein: 17.1, carbs: 37, fat: 2.8, fiber: 7 },
+  { date: '2026-04-18', meal: '早餐 05:00', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-18', meal: '早餐 07:00', items: '菜肉大馌饨 8个（干拌）', photo: '', cal: 320, protein: 12, carbs: 36, fat: 14, fiber: 2 },
+  { date: '2026-04-18', meal: '早餐 07:00', items: '无锡咸豆浆（干丝+炸面食碎）', photo: '', cal: 120, protein: 5, carbs: 8, fat: 7, fiber: 0 },
+  { date: '2026-04-18', meal: '早餐 07:00', items: '葱油饼 4口 ~40g', photo: '', cal: 110, protein: 2, carbs: 14, fat: 5, fiber: 0 },
+  { date: '2026-04-18', meal: '早餐 07:00', items: '鸭血小馌饨汤 10个', photo: '', cal: 300, protein: 12, carbs: 35, fat: 12, fiber: 1 },
+  { date: '2026-04-18', meal: '午餐 11:30', items: '卤鸡腿 2个（去皮，带骨~360g）', photo: 'photos/2026-04-18_午餐_卤鸡腿青菜.jpg', cal: 280, protein: 40, carbs: 4, fat: 10, fiber: 0 },
+  { date: '2026-04-18', meal: '午餐 11:30', items: '烫青菜+豆芽 ~200g', photo: '', cal: 30, protein: 3, carbs: 4, fat: 0.5, fiber: 2 },
+  { date: '2026-04-18', meal: '午餐 11:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-18', meal: '午餐 11:30', items: '益生菌 Body Lift 1条', photo: '', cal: 5, protein: 0, carbs: 1, fat: 0, fiber: 0 },
+  { date: '2026-04-18', meal: '午餐 11:30', items: '衡怡饮品 1条', photo: '', cal: 10, protein: 0, carbs: 2, fat: 0, fiber: 0 },
+  { date: '2026-04-18', meal: '晚餐 18:00', items: '小笼包 4个', photo: 'photos/2026-04-18_晚餐_无锡馌饨小笼包.jpg', cal: 240, protein: 8, carbs: 28, fat: 10, fiber: 0 },
+  { date: '2026-04-18', meal: '晚餐 18:00', items: '馌饨 6个', photo: '', cal: 210, protein: 7, carbs: 24, fat: 9, fiber: 0 },
+  { date: '2026-04-18', meal: '晚餐 18:00', items: '啡酒 2杯 ~600ml', photo: '', cal: 260, protein: 2, carbs: 20, fat: 0, fiber: 0 },
+  { date: '2026-04-18', meal: '晚餐 18:00', items: '炸蚕豆 几口 ~20g', photo: '', cal: 70, protein: 3, carbs: 6, fat: 4, fiber: 0 },
+  { date: '2026-04-18', meal: '晚餐 18:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-18', meal: '晚餐 18:00', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-18', meal: '晚餐 18:00', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-04-19', meal: '早餐 09:00', items: 'BodyKey乐纤代餐 1包+水', photo: '', cal: 150, protein: 16, carbs: 14, fat: 2.5, fiber: 5.5 },
+  { date: '2026-04-19', meal: '早餐 09:00', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-19', meal: '午餐 12:00', items: '藜麦饭团夹油条+新奥尔良鸡腿排', photo: '', cal: 520, protein: 18, carbs: 55, fat: 25, fiber: 2 },
+  { date: '2026-04-19', meal: '午餐 12:00', items: '豆浆 1杯', photo: '', cal: 60, protein: 3, carbs: 5, fat: 3, fiber: 0 },
+  { date: '2026-04-19', meal: '午餐 12:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-19', meal: '午餐 12:00', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-04-19', meal: '晚餐 18:00', items: '火车便当：猪大排盖饭', photo: '', cal: 697, protein: 32, carbs: 85.5, fat: 24.9, fiber: 1 },
+  { date: '2026-04-19', meal: '晚餐 18:00', items: '卤蛋半个+西兰花+藕片', photo: '', cal: 55, protein: 5, carbs: 1.5, fat: 2.5, fiber: 0.5 },
+  { date: '2026-04-19', meal: '晚餐 18:00', items: '无糖可乐', photo: '', cal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-19', meal: '晚餐 18:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-19', meal: '晚餐 18:00', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-19', meal: '晚餐 18:00', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-04-20', meal: '早餐 10:30', items: '奶昔（沛源蛋白粉2勺+菠萝60g+芒果30g+水）', photo: '', cal: 155, protein: 16.5, carbs: 19, fat: 1.6, fiber: 1.5 },
+  { date: '2026-04-20', meal: '早餐 10:30', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-20', meal: '午餐 13:00', items: '鸡胸肉173g炒莴笋167g（全量2/3）', photo: 'photos/2026-04-20_午餐_莴笋鸡肉空心菜.jpg', cal: 259, protein: 55.5, carbs: 5, fat: 6, fiber: 2 },
+  { date: '2026-04-20', meal: '午餐 13:00', items: '蒜蓉豌豆尖 150g', photo: '', cal: 55, protein: 4, carbs: 5, fat: 3, fiber: 2.5 },
+  { date: '2026-04-20', meal: '午餐 13:00', items: '三色糙米饭 130g（熟）', photo: '', cal: 143, protein: 3, carbs: 29, fat: 1, fiber: 1.5 },
+  { date: '2026-04-20', meal: '午餐 13:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-20', meal: '午餐 13:00', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-04-20', meal: '晚餐 18:50', items: '鸡胸肉87g+莴笋83g（剩余1/3）', photo: '', cal: 130, protein: 28, carbs: 2.5, fat: 3, fiber: 1 },
+  { date: '2026-04-20', meal: '晚餐 18:50', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-20', meal: '晚餐 18:50', items: '菠萝45g', photo: '', cal: 20, protein: 0.2, carbs: 5, fat: 0.1, fiber: 0.5 },
+  { date: '2026-04-20', meal: '晚餐 18:50', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-20', meal: '晚餐 19:30', items: '知味观腌童子鸡 半只（~200g肉）', photo: 'photos/2026-04-20_晚餐_腌童子鸡恰巴塔.jpg', cal: 504, protein: 46, carbs: 12.6, fat: 30, fiber: 0 },
+  { date: '2026-04-20', meal: '晚餐 19:30', items: '恰巴塔 100g + 减脂奶酪15g', photo: '', cal: 256, protein: 10.5, carbs: 46.1, fat: 2.95, fiber: 0.5 },
+  { date: '2026-04-21', meal: '早餐 11:30', items: '奶昔（沛源蛋白粉2勺+菠萝70g+水）', photo: '', cal: 147, protein: 16.3, carbs: 16, fat: 1.6, fiber: 1 },
+  { date: '2026-04-21', meal: '早餐 11:30', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-21', meal: '午餐 14:00', items: '番茄牛肉炖菜（牛肉~200g+西红柿380g+金针菇85g+娃娃菜100g）', photo: 'photos/2026-04-21_午餐_番茄牛肉炖菜.jpg', cal: 331, protein: 48.8, carbs: 22.6, fat: 5.8, fiber: 5 },
+  { date: '2026-04-21', meal: '午餐 14:00', items: '蒜蓉豌豆尖 200g', photo: '', cal: 70, protein: 5.4, carbs: 6, fat: 4, fiber: 3 },
+  { date: '2026-04-21', meal: '午餐 14:00', items: '三色糙米饭 130g', photo: '', cal: 143, protein: 3, carbs: 29, fat: 1, fiber: 1.5 },
+  { date: '2026-04-21', meal: '午餐 14:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-21', meal: '午餐 14:00', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-04-21', meal: '晚餐 18:15', items: '奶昔（沛源蛋白粉2勺+芒果100g+水）', photo: '', cal: 177, protein: 16.6, carbs: 22, fat: 1.7, fiber: 1.5 },
+  { date: '2026-04-21', meal: '晚餐 18:15', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-22', meal: '早餐 09:30', items: '奶昔（植物蛋白粉2勺+芒果112g+水）', photo: '', cal: 182, protein: 16.8, carbs: 24, fat: 1.7, fiber: 1.5 },
+  { date: '2026-04-22', meal: '早餐 09:30', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-22', meal: '午餐 12:50', items: '春笋香菇炖鸡腿（去骨300g+春笋169g+香菇150g）', photo: 'photos/2026-04-22_午餐_春笋香菇炖鸡腿.jpg', cal: 464, protein: 69.1, carbs: 10.2, fat: 10, fiber: 5 },
+  { date: '2026-04-22', meal: '午餐 12:50', items: '蒜蓉辣炒豌豆尖 150g', photo: '', cal: 60, protein: 4, carbs: 5, fat: 3.5, fiber: 2.5 },
+  { date: '2026-04-22', meal: '午餐 12:50', items: '三色糙米饭 130g', photo: '', cal: 143, protein: 3, carbs: 29, fat: 1, fiber: 1.5 },
+  { date: '2026-04-22', meal: '午餐 12:50', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-22', meal: '午餐 12:50', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-04-22', meal: '晚餐 20:30', items: '恰巴塔三明治（煎鸡胸200g+煎蛋+煎蘑菇+酸奶黄瓜酱）', photo: 'photos/2026-04-22_晚餐_鸡胸恰巴塔三明治.jpg', cal: 669, protein: 84.2, carbs: 53.8, fat: 16.3, fiber: 2 },
+  { date: '2026-04-22', meal: '晚餐 20:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-22', meal: '晚餐 20:30', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-04-22', meal: '晚餐 20:30', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-23', meal: '早餐 09:00', items: '奶昔（植物蛋白粉2勺+香蕉63g+水）', photo: '', cal: 126, protein: 16.5, carbs: 16, fat: 1.3, fiber: 1.5 },
+  { date: '2026-04-23', meal: '早餐 09:00', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-23', meal: '午餐 14:00', items: '姜葱蒸鸡大腿 2个（去皮，肉~320g）', photo: 'photos/2026-04-23_午餐_姜葱蒸鸡腿.jpg', cal: 400, protein: 64, carbs: 0, fat: 16, fiber: 0 },
+  { date: '2026-04-23', meal: '午餐 14:00', items: '醋溜娃娃菜 80g', photo: '', cal: 15, protein: 1, carbs: 2, fat: 0.5, fiber: 1 },
+  { date: '2026-04-23', meal: '午餐 14:00', items: '恰巴塔100g+奶酪10g', photo: '', cal: 248, protein: 10.1, carbs: 45.9, fat: 2.4, fiber: 0.5 },
+  { date: '2026-04-23', meal: '午餐 14:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-23', meal: '午餐 14:00', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-04-23', meal: '晚餐 18:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-23', meal: '晚餐 18:30', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-23', meal: '晚餐 18:30', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-04-23', meal: '晚餐 20:00', items: '潮汕牛肉火锅（牛肉~225g+牛肉丸+黑木耳+生菜+玉米）', photo: 'photos/2026-04-23_晚餐_潮汕牛肉火锅.jpg', cal: 460, protein: 62.5, carbs: 22, fat: 12.7, fiber: 3 },
+  { date: '2026-04-23', meal: '晚餐 20:00', items: '沙茶酱蘸料', photo: '', cal: 80, protein: 2, carbs: 5, fat: 6, fiber: 0 },
+  { date: '2026-04-23', meal: '宵夜 22:00', items: '金酒调酒 3杯', photo: '', cal: 550, protein: 0, carbs: 37, fat: 0, fiber: 0 },
+  { date: '2026-04-23', meal: '宵夜 22:00', items: '配酒小食（坚果+毛豆）', photo: '', cal: 80, protein: 3, carbs: 4, fat: 5, fiber: 1 },
+  { date: '2026-04-24', meal: '早餐 08:30', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+香蕉93.3g+蓝莓52g）', photo: '', cal: 267, protein: 25.8, carbs: 38, fat: 1.4, fiber: 3 },
+  { date: '2026-04-24', meal: '早餐 08:30', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-24', meal: '午餐 12:50', items: '蒸鸡全腿（去皮）~260g肉', photo: 'photos/2026-04-24_午餐_蒸鸡全腿菜心.jpg', cal: 330, protein: 52, carbs: 0, fat: 13, fiber: 0 },
+  { date: '2026-04-24', meal: '午餐 12:50', items: '蒜蓉辣炒菜心 300g', photo: '', cal: 75, protein: 5, carbs: 7, fat: 3, fiber: 6 },
+  { date: '2026-04-24', meal: '午餐 12:50', items: '三色糙米饭 80g', photo: '', cal: 88, protein: 1.8, carbs: 18, fat: 0.6, fiber: 1 },
+  { date: '2026-04-24', meal: '午餐 12:50', items: '蘸水碟', photo: '', cal: 15, protein: 0.5, carbs: 2, fat: 0.5, fiber: 0 },
+  { date: '2026-04-24', meal: '午餐 12:50', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-24', meal: '午餐 12:50', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-04-24', meal: '晚餐 19:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-24', meal: '晚餐 19:00', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-24', meal: '晚餐 19:00', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-04-24', meal: '晚餐 20:30', items: '花蛤牛肋条汤（牛肋250g+花蛤+洋葱姜）半份', photo: 'photos/2026-04-24_晚餐_花蛤牛肋条汤.jpg', cal: 555, protein: 53.5, carbs: 4, fat: 35.5, fiber: 0.5 },
+  { date: '2026-04-24', meal: '晚餐 20:30', items: '蒜蓉法棍3片+普通法棍3片 ~110g', photo: '', cal: 300, protein: 8, carbs: 50, fat: 7, fiber: 1 },
+  { date: '2026-04-24', meal: '晚餐 20:30', items: '蘑菇白菜汤 半份', photo: '', cal: 25, protein: 2, carbs: 3, fat: 0.5, fiber: 1 },
+  { date: '2026-04-25', meal: '早餐 08:00', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+香蕉103g+蓝莓55g）', photo: 'photos/2026-04-25_早餐_蓝莓香蕉奶昔.jpg', cal: 282, protein: 26.2, carbs: 39, fat: 1.5, fiber: 3.5 },
+  { date: '2026-04-25', meal: '早餐 08:00', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-25', meal: '午餐 13:00', items: '蒸鸡全腿（去皮）~260g肉', photo: 'photos/2026-04-25_午餐_蒸鸡全腿糙米饭.jpg', cal: 330, protein: 52, carbs: 0, fat: 13, fiber: 0 },
+  { date: '2026-04-25', meal: '午餐 13:00', items: '炒娃娃菜 ~150g', photo: '', cal: 25, protein: 1.5, carbs: 3, fat: 1, fiber: 1.5 },
+  { date: '2026-04-25', meal: '午餐 13:00', items: '西红柿炒鸡蛋（~2蛋+1西红柿）', photo: '', cal: 165, protein: 10, carbs: 5, fat: 12, fiber: 1 },
+  { date: '2026-04-25', meal: '午餐 13:00', items: '三色糙米饭 130g', photo: '', cal: 143, protein: 3, carbs: 29, fat: 1, fiber: 1.5 },
+  { date: '2026-04-25', meal: '午餐 13:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-25', meal: '午餐 13:00', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-04-25', meal: '晚餐 20:00', items: '鸡腿肉（去皮）267g炒香菇47g+金针菇58g+娃娃菜133g（2/3）', photo: 'photos/2026-04-25_晚餐_鸡腿菇菜炒蛋.jpg', cal: 391, protein: 57.6, carbs: 8.4, fat: 8.8, fiber: 4 },
+  { date: '2026-04-25', meal: '晚餐 20:00', items: '西红柿炒鸡蛋（~1.5蛋+1西红柿）', photo: '', cal: 165, protein: 10, carbs: 5, fat: 12, fiber: 1 },
+  { date: '2026-04-25', meal: '晚餐 20:00', items: '三色糙米饭 130g', photo: '', cal: 143, protein: 3, carbs: 29, fat: 1, fiber: 1.5 },
+  { date: '2026-04-25', meal: '晚餐 20:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-25', meal: '晚餐 20:00', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-25', meal: '晚餐 20:00', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-04-26', meal: '早餐 11:30', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+香蕉85g+蓝莓55g）', photo: '', cal: 268, protein: 25.9, carbs: 36, fat: 1.4, fiber: 3.2 },
+  { date: '2026-04-26', meal: '早餐 11:30', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-26', meal: '午餐 11:45', items: '山野藤椒鸡肉饭（含煎蛋+糙米饭）', photo: 'photos/2026-04-26_午餐_藤椒鸡肉饭.jpg', cal: 578, protein: 28, carbs: 65, fat: 22, fiber: 2 },
+  { date: '2026-04-26', meal: '午餐 11:45', items: '加一份嫩烤鸡腿肉 ~100g', photo: '', cal: 130, protein: 18, carbs: 2, fat: 6, fiber: 0 },
+  { date: '2026-04-26', meal: '午餐 11:45', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-26', meal: '午餐 11:45', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-04-26', meal: '晚餐 19:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-26', meal: '晚餐 19:00', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-26', meal: '晚餐 19:00', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-04-26', meal: '加餐 19:30', items: '帕马森茴香炒蛋 2个', photo: 'photos/2026-04-26_加餐_帕马森炒蛋黑麦面包.jpg', cal: 240, protein: 17, carbs: 1, fat: 18.5, fiber: 0 },
+  { date: '2026-04-26', meal: '加餐 19:30', items: '黑麦面包 100g + 减脂奶酪 ~15g', photo: '', cal: 273, protein: 9.4, carbs: 45.6, fat: 4.7, fiber: 4 },
+  { date: '2026-04-26', meal: '加餐 19:30', items: '脱脂牛奶 250ml', photo: '', cal: 85, protein: 8.3, carbs: 12.5, fat: 0, fiber: 0 },
+  { date: '2026-04-27', meal: '早餐 07:30', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+香蕉83g+蓝莓67g）', photo: '', cal: 280, protein: 26.4, carbs: 37, fat: 1.5, fiber: 3.5 },
+  { date: '2026-04-27', meal: '早餐 07:30', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-27', meal: '午餐 12:50', items: '三文鱼茴香酸奶泥三明治（三文鱼137g+黄油3.8g+洋葡26g+酸奨30g）', photo: 'photos/2026-04-27_午餐_三文鱼茴香三明治.jpg', cal: 376, protein: 30.1, carbs: 4.7, fat: 26.1, fiber: 0 },
+  { date: '2026-04-27', meal: '午餐 12:50', items: '黑麦面包 3片 106g', photo: '', cal: 265, protein: 8.5, carbs: 48, fat: 3.2, fiber: 6 },
+  { date: '2026-04-27', meal: '午餐 12:50', items: '黄瓜 ~150g', photo: '', cal: 18, protein: 1, carbs: 3, fat: 0.1, fiber: 1 },
+  { date: '2026-04-27', meal: '午餐 12:50', items: '金汤力 半杯（金酒+普通汤力水）', photo: '', cal: 85, protein: 0, carbs: 6.5, fat: 0, fiber: 0 },
+  { date: '2026-04-27', meal: '午餐 12:50', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-27', meal: '午餐 12:50', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-04-27', meal: '晚餐 20:00', items: '干锅牛蛙（8.4斤/7人）牛蛙肉~300g+炸土豆条+干锅油', photo: 'photos/2026-04-27_晚餐_干锅牛蛙.jpg', cal: 520, protein: 50, carbs: 23, fat: 25, fiber: 0 },
+  { date: '2026-04-27', meal: '晚餐 20:00', items: '梅干菜肉包子 1个', photo: '', cal: 120, protein: 3.5, carbs: 15, fat: 5, fiber: 0 },
+  { date: '2026-04-27', meal: '晚餐 20:00', items: '蓔菜沙拉 几口', photo: '', cal: 30, protein: 1, carbs: 2, fat: 2, fiber: 1 },
+  { date: '2026-04-27', meal: '晚餐 20:00', items: '无糖可乐', photo: '', cal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-27', meal: '晚餐 20:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-27', meal: '晚餐 20:00', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-27', meal: '晚餐 20:00', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-04-28', meal: '早餐 11:00', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+香蕉89g）', photo: '', cal: 245, protein: 25.4, carbs: 35, fat: 1.3, fiber: 1.5 },
+  { date: '2026-04-28', meal: '早餐 11:00', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-28', meal: '午餐 14:00', items: '水波蛋 3个', photo: 'photos/2026-04-28_午餐_水波蛋恰巴塔豌豆尖.jpg', cal: 210, protein: 18, carbs: 1.5, fat: 15, fiber: 0 },
+  { date: '2026-04-28', meal: '午餐 14:00', items: '恰巴塔 100g', photo: '', cal: 233, protein: 9.1, carbs: 45.5, fat: 1.3, fiber: 0.5 },
+  { date: '2026-04-28', meal: '午餐 14:00', items: '清炒豌豆尖 300g', photo: '', cal: 70, protein: 8.1, carbs: 7.5, fat: 3, fiber: 4 },
+  { date: '2026-04-28', meal: '午餐 14:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-28', meal: '午餐 14:00', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-04-28', meal: '晚餐 21:30', items: '三文鱼125g橄榄油2g煎+希腊酸奨80g拌泥', photo: 'photos/2026-04-28_晚餐_三文鱼酸奶泥黑麦面包.jpg', cal: 363, protein: 31.4, carbs: 3.6, fat: 23.9, fiber: 0 },
+  { date: '2026-04-28', meal: '晚餐 21:30', items: '黑麦面包 90g', photo: '', cal: 225, protein: 7.2, carbs: 40.5, fat: 2.7, fiber: 5.4 },
+  { date: '2026-04-28', meal: '晚餐 21:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-28', meal: '晚餐 21:30', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-28', meal: '晚餐 21:30', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-04-29', meal: '早餐 11:00', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+香蕉110g+冷冻蓝莓60g）', photo: '', cal: 292, protein: 26.4, carbs: 40, fat: 1.5, fiber: 3.5 },
+  { date: '2026-04-29', meal: '早餐 11:00', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-29', meal: '午餐 12:50', items: '魔芋荷麦面 80g+青酱~30g', photo: 'photos/2026-04-29_午餐_荷麦面青酱鸡腿.jpg', cal: 265, protein: 9.5, carbs: 27.1, fat: 10, fiber: 6.1 },
+  { date: '2026-04-29', meal: '午餐 12:50', items: '蒸鸡全腿（去皮去骨）220g', photo: '', cal: 279, protein: 44, carbs: 0, fat: 11, fiber: 0 },
+  { date: '2026-04-29', meal: '午餐 12:50', items: '清炒豌豆尖 200g', photo: '', cal: 50, protein: 5.4, carbs: 5, fat: 3, fiber: 3 },
+  { date: '2026-04-29', meal: '午餐 12:50', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-29', meal: '午餐 12:50', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-04-29', meal: '晚餐 19:00', items: '蒸鸡全腿（去皮去骨）220g', photo: 'photos/2026-04-29_晚餐_鸡腿花菜黑麦面包.jpg', cal: 279, protein: 44, carbs: 0, fat: 11, fiber: 0 },
+  { date: '2026-04-29', meal: '晚餐 19:00', items: '清炒白花菜 380g', photo: '', cal: 140, protein: 7.6, carbs: 15.2, fat: 5.4, fiber: 7.6 },
+  { date: '2026-04-29', meal: '晚餐 19:00', items: '黑麦面包 100g + 蒜香茴香黄油10g', photo: '', cal: 324, protein: 8, carbs: 45, fat: 10.4, fiber: 6 },
+  { date: '2026-04-29', meal: '晚餐 19:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-29', meal: '晚餐 19:00', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-29', meal: '晚餐 19:00', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-04-30', meal: '早餐 10:30', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+香蕉110g+冷冻蓝莓60g）', photo: '', cal: 292, protein: 26.4, carbs: 40, fat: 1.5, fiber: 3.5 },
+  { date: '2026-04-30', meal: '早餐 10:30', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-30', meal: '午餐 11:30', items: '鸡汤炖鸡全腿（去皮220g）+娃娃菜165g+香菇100g', photo: 'photos/2026-04-30_午餐_鸡汤炖鸡腿香菇.jpg', cal: 333, protein: 50, carbs: 7.3, fat: 11.6, fiber: 4 },
+  { date: '2026-04-30', meal: '午餐 11:30', items: '黑麦面包 80g', photo: '', cal: 200, protein: 6.4, carbs: 36, fat: 2.4, fiber: 4.8 },
+  { date: '2026-04-30', meal: '午餐 11:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-30', meal: '午餐 11:30', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-04-30', meal: '加餐 16:00', items: '开心果阿芙佳朵', photo: '', cal: 220, protein: 4, carbs: 22, fat: 13, fiber: 0 },
+  { date: '2026-04-30', meal: '加餐 16:00', items: 'Gelato 半份（芒果+奶油）', photo: '', cal: 110, protein: 2, carbs: 16, fat: 5, fiber: 0 },
+  { date: '2026-04-30', meal: '加餐 16:00', items: '冰美式', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-30', meal: '晚餐 18:30', items: '丝瓜鸡汤 半碗', photo: 'photos/2026-04-30_晚餐_宜宾酒家.jpg', cal: 60, protein: 4, carbs: 4, fat: 3, fiber: 1 },
+  { date: '2026-04-30', meal: '晚餐 18:30', items: '红烧牛肉竹笋煲 半份', photo: '', cal: 220, protein: 22, carbs: 8, fat: 12, fiber: 1 },
+  { date: '2026-04-30', meal: '晚餐 18:30', items: '凉拌空心菜 半份', photo: '', cal: 40, protein: 2, carbs: 3, fat: 2.5, fiber: 1.5 },
+  { date: '2026-04-30', meal: '晚餐 18:30', items: '宜宾燃面 半份', photo: '', cal: 280, protein: 7, carbs: 40, fat: 10, fiber: 0.5 },
+  { date: '2026-04-30', meal: '晚餐 18:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-04-30', meal: '晚餐 18:30', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-04-30', meal: '晚餐 18:30', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-04-30', meal: '宵夜 23:00', items: '黑啪 2杯 + 调酒 1杯 + Highball 半杯', photo: '', cal: 540, protein: 2, carbs: 35, fat: 0, fiber: 0 },
+  { date: '2026-05-01', meal: '早餐 11:00', items: 'BodyKey乐纤代餐（椰子味）+水', photo: '', cal: 150, protein: 16, carbs: 14, fat: 2.5, fiber: 5.5 },
+  { date: '2026-05-01', meal: '早餐 11:00', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-05-01', meal: '午餐 13:30', items: '麦当劳板烧鸡腿堡', photo: 'photos/2026-05-01_午餐_麦当劳板烧鸡腿.jpg', cal: 390, protein: 22, carbs: 37, fat: 17, fiber: 1 },
+  { date: '2026-05-01', meal: '午餐 13:30', items: '去皮鸡腿 1个', photo: '', cal: 130, protein: 16, carbs: 0, fat: 7, fiber: 0 },
+  { date: '2026-05-01', meal: '午餐 13:30', items: '无糖可乐', photo: '', cal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-05-01', meal: '午餐 13:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-01', meal: '午餐 13:30', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-05-01', meal: '晚餐 20:30', items: '回转寿司（三文鱼2贯+牛肉/鰷寿司2贯+鳅鱼3贯+手卷2个+烤物）', photo: 'photos/2026-05-01_晚餐_回转寿司.jpg', cal: 660, protein: 35, carbs: 78, fat: 24, fiber: 1 },
+  { date: '2026-05-01', meal: '晚餐 20:30', items: '温泉蛋乌冬面（天妇碎+木鱼花）', photo: '', cal: 380, protein: 12, carbs: 55, fat: 12, fiber: 1 },
+  { date: '2026-05-01', meal: '晚餐 20:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-01', meal: '晚餐 20:30', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-05-01', meal: '晚餐 20:30', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-05-01', meal: '宵夜 23:00', items: 'Highball 3杯 + 调酒 1杯', photo: '', cal: 660, protein: 0, carbs: 40, fat: 0, fiber: 0 },
+  { date: '2026-05-01', meal: '宵夜 23:00', items: '配酒小食（花生+咸脆零食）2小碟', photo: '', cal: 200, protein: 5, carbs: 10, fat: 14, fiber: 1 },
+  { date: '2026-05-02', meal: '早餐 10:00', items: 'BodyKey乐纤代餐+水', photo: '', cal: 150, protein: 16, carbs: 14, fat: 2.5, fiber: 5.5 },
+  { date: '2026-05-02', meal: '早餐 10:00', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-05-02', meal: '午餐 12:00', items: '麦当劳板烧鸡腿堡', photo: 'photos/2026-05-02_午餐_麦当劳.jpg', cal: 390, protein: 22, carbs: 37, fat: 17, fiber: 1 },
+  { date: '2026-05-02', meal: '午餐 12:00', items: '玉米杯', photo: '', cal: 80, protein: 3, carbs: 16, fat: 1, fiber: 2 },
+  { date: '2026-05-02', meal: '午餐 12:00', items: '无糖可乐', photo: '', cal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-05-02', meal: '午餐 12:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-02', meal: '午餐 12:00', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-05-02', meal: '晚餐 18:00', items: '火车站便当（炸鸡排+酱炸鸡+白米饭+木耳芹菜+蛋花汤）', photo: 'photos/2026-05-02_晚餐_火车站便当.jpg', cal: 945, protein: 43.5, carbs: 100, fat: 39.6, fiber: 3 },
+  { date: '2026-05-03', meal: '早餐 08:30', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+香蕉110g+冷冻蓝莓62g）', photo: '', cal: 292, protein: 26.4, carbs: 40, fat: 1.5, fiber: 3.5 },
+  { date: '2026-05-03', meal: '早餐 08:30', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-05-03', meal: '午餐 14:30', items: '蒸鸡全腿（去皮）220g+白菜香菇', photo: 'photos/2026-05-03_午餐_鸡腿发糕炒蛋.jpg', cal: 304, protein: 46, carbs: 4, fat: 11.3, fiber: 2 },
+  { date: '2026-05-03', meal: '午餐 14:30', items: '西红柿炒鸡蛋（~2蛋+1西红柿）', photo: '', cal: 165, protein: 10, carbs: 5, fat: 12, fiber: 1 },
+  { date: '2026-05-03', meal: '午餐 14:30', items: '玉米发糕 100g', photo: '', cal: 200, protein: 4, carbs: 40, fat: 3, fiber: 2 },
+  { date: '2026-05-03', meal: '午餐 14:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-03', meal: '午餐 14:30', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-05-03', meal: '晚餐 21:00', items: '鳕鱼鲜虾饼 4片 208g（蒸）', photo: 'photos/2026-05-03_晚餐_虾饼鸡蛋香菇白菜.jpg', cal: 183, protein: 30, carbs: 8.5, fat: 2.9, fiber: 0 },
+  { date: '2026-05-03', meal: '晚餐 21:00', items: '水煮蛋 2个', photo: '', cal: 140, protein: 12, carbs: 1, fat: 10, fiber: 0 },
+  { date: '2026-05-03', meal: '晚餐 21:00', items: '清炒香菇白菜 ~200g', photo: '', cal: 35, protein: 3, carbs: 4, fat: 1, fiber: 3 },
+  { date: '2026-05-03', meal: '晚餐 21:00', items: '玉米面饽饽 77g', photo: '', cal: 162, protein: 3.9, carbs: 32, fat: 2.3, fiber: 2 },
+  { date: '2026-05-03', meal: '晚餐 21:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-03', meal: '晚餐 21:00', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-05-03', meal: '晚餐 21:00', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-05-04', meal: '早餐 09:00', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+香蕉110g）', photo: '', cal: 260, protein: 25.6, carbs: 37, fat: 1.3, fiber: 1.5 },
+  { date: '2026-05-04', meal: '早餐 09:00', items: '水煮蛋 1个', photo: '', cal: 70, protein: 6, carbs: 0.5, fat: 5, fiber: 0 },
+  { date: '2026-05-04', meal: '早餐 09:00', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-05-04', meal: '午餐 14:00', items: '清蒸鲈鱼 半条 ~150g肉', photo: 'photos/2026-05-04_午餐_鲈鱼鸡腿西兰花.jpg', cal: 155, protein: 30, carbs: 0, fat: 3.5, fiber: 0 },
+  { date: '2026-05-04', meal: '午餐 14:00', items: '五香鸡腿（去皮）~130g肉', photo: '', cal: 165, protein: 24, carbs: 5, fat: 6, fiber: 0 },
+  { date: '2026-05-04', meal: '午餐 14:00', items: '水煮西兰花 ~200g', photo: '', cal: 55, protein: 6, carbs: 6, fat: 0.5, fiber: 5 },
+  { date: '2026-05-04', meal: '午餐 14:00', items: '糙米饭（商家标）96kcal', photo: '', cal: 96, protein: 2, carbs: 20, fat: 0.5, fiber: 1 },
+  { date: '2026-05-04', meal: '午餐 14:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-04', meal: '午餐 14:00', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-05-04', meal: '加餐 16:00', items: '水煮蛋 1个', photo: '', cal: 70, protein: 6, carbs: 0.5, fat: 5, fiber: 0 },
+  { date: '2026-05-04', meal: '晚餐 20:00', items: '蒸鸡全腿（去皮）220g', photo: 'photos/2026-05-04_晚餐_鸡腿醋溜白菜糙米.jpg', cal: 279, protein: 44, carbs: 0, fat: 11, fiber: 0 },
+  { date: '2026-05-04', meal: '晚餐 20:00', items: '醋溜白菜 250g', photo: '', cal: 40, protein: 2.5, carbs: 5, fat: 1.5, fiber: 2.5 },
+  { date: '2026-05-04', meal: '晚餐 20:00', items: '三色糙米饭 98g', photo: '', cal: 108, protein: 2.3, carbs: 22, fat: 0.8, fiber: 1 },
+  { date: '2026-05-04', meal: '晚餐 20:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-04', meal: '晚餐 20:00', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-05-04', meal: '晚餐 20:00', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-05-05', meal: '早餐 11:00', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+香蕉110g）', photo: '', cal: 260, protein: 25.6, carbs: 37, fat: 1.3, fiber: 1.5 },
+  { date: '2026-05-05', meal: '早餐 11:00', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-05-05', meal: '午餐 13:00', items: '煎三文鱼（去皮）80g', photo: '', cal: 130, protein: 16, carbs: 0, fat: 7, fiber: 0 },
+  { date: '2026-05-05', meal: '午餐 13:00', items: '琵琶腿（去皮）+香菇60g+娃娃菜250g', photo: '', cal: 113, protein: 14.8, carbs: 7.4, fat: 2.8, fiber: 4 },
+  { date: '2026-05-05', meal: '午餐 13:00', items: '小米饽饽 ~10g', photo: '', cal: 21, protein: 0.4, carbs: 4, fat: 0.3, fiber: 0 },
+  { date: '2026-05-05', meal: '午餐 13:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-05', meal: '午餐 13:00', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-05-05', meal: '晚餐 16:45', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+香蕉100g+蓝莓60g）', photo: '', cal: 275, protein: 25.8, carbs: 36, fat: 1.4, fiber: 3 },
+  { date: '2026-05-05', meal: '晚餐 16:45', items: '水煮蛋 2个', photo: '', cal: 140, protein: 12, carbs: 1, fat: 10, fiber: 0 },
+  { date: '2026-05-06', meal: '早餐 09:30', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+香蕉102g+蓝莓55g）', photo: '', cal: 280, protein: 26, carbs: 38, fat: 1.5, fiber: 3.5 },
+  { date: '2026-05-06', meal: '早餐 09:30', items: '倍立健 1对+钙镁片 2片+B族 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-05-06', meal: '午餐 13:30', items: '蒸鸡全腿（去皮）220g', photo: '', cal: 279, protein: 44, carbs: 0, fat: 11, fiber: 0 },
+  { date: '2026-05-06', meal: '午餐 13:30', items: '清炒笋丝 400g', photo: '', cal: 100, protein: 10, carbs: 10, fat: 3.5, fiber: 10 },
+  { date: '2026-05-06', meal: '午餐 13:30', items: '三色糙米饭 130g', photo: '', cal: 143, protein: 3, carbs: 29, fat: 1, fiber: 1.5 },
+  { date: '2026-05-06', meal: '午餐 13:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-06', meal: '午餐 13:30', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-05-06', meal: '晚餐 18:45', items: '红烧带鱼 200g', photo: 'photos/2026-05-06_晚餐_红烧带鱼菜花.jpg', cal: 280, protein: 28, carbs: 8, fat: 15, fiber: 0 },
+  { date: '2026-05-06', meal: '晚餐 18:45', items: '菜花炒肉 ~150g', photo: '', cal: 180, protein: 10, carbs: 6, fat: 13, fiber: 2 },
+  { date: '2026-05-06', meal: '晚餐 18:45', items: '清炒小白菜 ~200g', photo: '', cal: 45, protein: 3, carbs: 4, fat: 2.5, fiber: 2 },
+  { date: '2026-05-06', meal: '晚餐 18:45', items: '白米饭 125g', photo: '', cal: 145, protein: 3, carbs: 32, fat: 0.3, fiber: 0 },
+  { date: '2026-05-06', meal: '晚餐 18:45', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-06', meal: '晚餐 18:45', items: '倍立健 1对+钙镁片 2片', photo: '', cal: 5, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  { date: '2026-05-06', meal: '晚餐 18:45', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-05-07', meal: '早餐 12:00', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+香蕉100g+蓝莓62g+亚麻籽油几滴）', photo: '', cal: 285, protein: 26.2, carbs: 38, fat: 2, fiber: 3.5 },
+  { date: '2026-05-07', meal: '早餐 12:00', items: '倍立健 1对+钙镁片 2片+B族 2片+鱼油 1粒', photo: '', cal: 10, protein: 0, carbs: 0, fat: 0.7, fiber: 0 },
+  { date: '2026-05-07', meal: '午餐 14:30', items: '上脑牛排 200g（少油煎）', photo: 'photos/2026-05-07_午餐_牛排白花菜.jpg', cal: 420, protein: 38, carbs: 0, fat: 28, fiber: 0 },
+  { date: '2026-05-07', meal: '午餐 14:30', items: '白花菜 200g（黑胡椒）', photo: '', cal: 55, protein: 4, carbs: 8, fat: 0.5, fiber: 4 },
+  { date: '2026-05-07', meal: '午餐 14:30', items: '恰巴塔 80g', photo: '', cal: 186, protein: 7.3, carbs: 36.4, fat: 1, fiber: 0.5 },
+  { date: '2026-05-07', meal: '午餐 14:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-07', meal: '午餐 14:30', items: '益生菌+衡怡+葆芯2条+鱼油1粒', photo: '', cal: 40, protein: 0, carbs: 4, fat: 0.7, fiber: 0 },
+  { date: '2026-05-07', meal: '晚餐 20:30', items: '鸡胸牵油果沙拉（鸡胸176g+牵油果83g+黄瓜155g+西红柿83g+红洋葡51g+酸奨30g）', photo: 'photos/2026-05-07_晚餐_鸡胸牵油果沙拉.jpg', cal: 420, protein: 58.7, carbs: 14, fat: 17, fiber: 7 },
+  { date: '2026-05-07', meal: '晚餐 20:30', items: '恰巴塔 100g', photo: '', cal: 233, protein: 9.1, carbs: 45.5, fat: 1.3, fiber: 0.5 },
+  { date: '2026-05-07', meal: '晚餐 20:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-07', meal: '晚餐 20:30', items: '倍立健 1对+钙镁片 2片+鱼油1粒', photo: '', cal: 10, protein: 0, carbs: 0, fat: 0.7, fiber: 0 },
+  { date: '2026-05-07', meal: '晚餐 20:30', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-05-08', meal: '早餐 09:00', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+香蕉97g+蓝莓69g+亚麻籽9g）', photo: '', cal: 338, protein: 28, carbs: 40, fat: 5.5, fiber: 6 },
+  { date: '2026-05-08', meal: '早餐 09:00', items: '倍立健 1对+钙镁片 2片+B族 2片+维C 1片+鱼油 1粒', photo: '', cal: 12, protein: 0, carbs: 0, fat: 0.7, fiber: 0 },
+  { date: '2026-05-08', meal: '午餐 12:30', items: '蒸鸡全腿（去皮）220g', photo: 'photos/2026-05-08_午餐_露营鸡腿恰巴塔.jpg', cal: 279, protein: 44, carbs: 0, fat: 11, fiber: 0 },
+  { date: '2026-05-08', meal: '午餐 12:30', items: '恰巴塔 100g', photo: '', cal: 233, protein: 9.1, carbs: 45.5, fat: 1.3, fiber: 0.5 },
+  { date: '2026-05-08', meal: '午餐 12:30', items: '白花菜 300g', photo: '', cal: 75, protein: 6, carbs: 12, fat: 0.5, fiber: 6 },
+  { date: '2026-05-08', meal: '晚餐 19:00', items: '干蒸虾 10只（肉~250g）', photo: 'photos/2026-05-08_晚餐_干蒸虾油麦菜.jpg', cal: 225, protein: 50, carbs: 0, fat: 2.5, fiber: 0 },
+  { date: '2026-05-08', meal: '晚餐 19:00', items: '清炒油麦菜 ~250g', photo: '', cal: 50, protein: 3, carbs: 4, fat: 3, fiber: 2.5 },
+  { date: '2026-05-08', meal: '晚餐 19:00', items: '恰巴塔 80g', photo: '', cal: 186, protein: 7.3, carbs: 36.4, fat: 1, fiber: 0.4 },
+  { date: '2026-05-08', meal: '晚餐 19:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-08', meal: '晚餐 19:00', items: '倍立健 1对+钙镁片 2片+鱼油1粒', photo: '', cal: 10, protein: 0, carbs: 0, fat: 0.7, fiber: 0 },
+  { date: '2026-05-08', meal: '晚餐 19:00', items: '益生菌+衡怡+葆芯2条', photo: '', cal: 35, protein: 0, carbs: 4, fat: 0, fiber: 0 },
+  { date: '2026-05-09', meal: '早餐 11:00', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+香蕉100g+蓝莓65g+亚麻籽油2g）', photo: '', cal: 290, protein: 26.2, carbs: 38, fat: 3.5, fiber: 3.5 },
+  { date: '2026-05-09', meal: '早餐 11:00', items: '倍立健 1对+钙镁片 2片+B族 2片+维C 1片+鱼油 1粒', photo: '', cal: 12, protein: 0, carbs: 0, fat: 0.7, fiber: 0 },
+  { date: '2026-05-09', meal: '午餐 18:00', items: '琵琶腿（去皮）4个 ~200g肉', photo: 'photos/2026-05-09_午餐_露营琵琶腿西兰花.jpg', cal: 250, protein: 40, carbs: 0, fat: 10, fiber: 0 },
+  { date: '2026-05-09', meal: '午餐 18:00', items: '水煮西兰花 ~200g', photo: '', cal: 55, protein: 6, carbs: 6, fat: 0.5, fiber: 5 },
+  { date: '2026-05-09', meal: '午餐 18:00', items: '白米饭 ~30g', photo: '', cal: 35, protein: 0.7, carbs: 8, fat: 0.1, fiber: 0 },
+  { date: '2026-05-09', meal: '午餐 18:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-09', meal: '午餐 18:00', items: '益生菌+衡怡+葆芯2条+鱼油1粒', photo: '', cal: 40, protein: 0, carbs: 4, fat: 0.7, fiber: 0 },
+  { date: '2026-05-09', meal: '晚餐 18:00', items: '炒娃娃菜230g+香菇80g', photo: 'photos/2026-05-09_晚餐_娃娃菜香菇糙米.jpg', cal: 52, protein: 5, carbs: 7, fat: 0.5, fiber: 4 },
+  { date: '2026-05-09', meal: '晚餐 18:00', items: '三色糙米饭 130g', photo: '', cal: 143, protein: 3, carbs: 29, fat: 1, fiber: 1.5 },
+  { date: '2026-05-09', meal: '晚餐 18:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-09', meal: '晚餐 18:00', items: '倍立健 1对+钙镁片 2片+鱼油1粒', photo: '', cal: 10, protein: 0, carbs: 0, fat: 0.7, fiber: 0 },
+  { date: '2026-05-09', meal: '晚餐 18:00', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-05-10', meal: '早餐 08:30', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+蓝莓101g）', photo: '', cal: 198, protein: 25, carbs: 21, fat: 1.3, fiber: 3 },
+  { date: '2026-05-10', meal: '早餐 08:30', items: '倍立健 1对+钙镁片 2片+B族 2片+维C 1片+鱼油 1粒', photo: '', cal: 12, protein: 0, carbs: 0, fat: 0.7, fiber: 0 },
+  { date: '2026-05-10', meal: '午餐 13:00', items: '魔芋荷麦面100g+鸡腿肉丁300g+清汤豌豆尖250g', photo: '', cal: 620, protein: 74.1, carbs: 36.4, fat: 15.3, fiber: 10.6 },
+  { date: '2026-05-10', meal: '午餐 13:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-10', meal: '午餐 13:00', items: '益生菌+衡怡+葆芯2条+鱼油1粒', photo: '', cal: 40, protein: 0, carbs: 4, fat: 0.7, fiber: 0 },
+  { date: '2026-05-10', meal: '晚餐 20:00', items: '韩式烤肉（五花肉+牛肉+鱱鱼+年糕+生菜包肉）半份', photo: 'photos/2026-05-10_晚餐_韩式烤肉.jpg', cal: 880, protein: 52, carbs: 29, fat: 62, fiber: 2 },
+  { date: '2026-05-10', meal: '晚餐 20:00', items: 'Highball 2杯', photo: '', cal: 320, protein: 0, carbs: 20, fat: 0, fiber: 0 },
+  { date: '2026-05-11', meal: '早餐 09:00', items: '奶昔（植物蛋白粉2勺+全脂牛奶243ml+香蕉100g）', photo: '', cal: 314, protein: 25.1, carbs: 37, fat: 9.8, fiber: 1.5 },
+  { date: '2026-05-11', meal: '早餐 09:00', items: '倍立健 1对+钙镁片 2片+B族 2片+维C 1片+鱼油 1粒', photo: '', cal: 12, protein: 0, carbs: 0, fat: 0.7, fiber: 0 },
+  { date: '2026-05-11', meal: '午餐 13:00', items: '牛肋花蛤汤（牛肋250g+花蛤+胡萝卜）', photo: 'photos/2026-05-11_午餐_牛肋花蛤汤法棍.jpg', cal: 525, protein: 50.5, carbs: 5, fat: 32.6, fiber: 1 },
+  { date: '2026-05-11', meal: '午餐 13:00', items: '清炒白菜 200g', photo: '', cal: 35, protein: 2.5, carbs: 4, fat: 1.5, fiber: 2 },
+  { date: '2026-05-11', meal: '午餐 13:00', items: '法棍 100g', photo: '', cal: 250, protein: 9, carbs: 48, fat: 1.3, fiber: 2 },
+  { date: '2026-05-11', meal: '午餐 13:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-11', meal: '午餐 13:00', items: '益生菌+衡怡+葆芯2条+鱼油1粒', photo: '', cal: 40, protein: 0, carbs: 4, fat: 0.7, fiber: 0 },
+  { date: '2026-05-11', meal: '晚餐 19:00', items: '滨寿司（7贯：鲷鱼+三文鱼+金枪鱼大腹+金枪鱼泥+金枪鱼大切+鳕鱼+星鲳）', photo: '', cal: 420, protein: 24, carbs: 57, fat: 10, fiber: 0 },
+  { date: '2026-05-11', meal: '晚餐 19:00', items: '三文鱼刺身2片+玉子烧+茶碗蒸+秋葵+味增汤', photo: '', cal: 250, protein: 19, carbs: 13, fat: 13.5, fiber: 1 },
+  { date: '2026-05-11', meal: '晚餐 19:00', items: 'Highball 1杯', photo: '', cal: 160, protein: 0, carbs: 10, fat: 0, fiber: 0 },
+  { date: '2026-05-12', meal: '午餐 11:30', items: '黄咖喱鸡（椰奶+鸡肉~150g）', photo: 'photos/2026-05-12_午餐_泰餐咖喱鸡蒸鱼.jpg', cal: 350, protein: 20, carbs: 10, fat: 26, fiber: 0 },
+  { date: '2026-05-12', meal: '午餐 11:30', items: '柠檬蒸鱼 ~150g', photo: '', cal: 160, protein: 28, carbs: 3, fat: 4, fiber: 0 },
+  { date: '2026-05-12', meal: '午餐 11:30', items: '菌菇冬阴功汤+炒芹菜', photo: '', cal: 130, protein: 6, carbs: 11, fat: 8, fiber: 3 },
+  { date: '2026-05-12', meal: '午餐 11:30', items: '白米饭 半份 ~125g', photo: '', cal: 145, protein: 3, carbs: 32, fat: 0.3, fiber: 0 },
+  { date: '2026-05-12', meal: '午餐 11:30', items: '益生菌+衡怡+葆芯2条+鱼油1粒+倍立健+钙镁片+B族+维C', photo: '', cal: 52, protein: 0, carbs: 4, fat: 0.7, fiber: 0 },
+  { date: '2026-05-12', meal: '加餐 15:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-12', meal: '晚餐 18:30', items: '盐焘琵琶腿（去皮ﾉ5个 ~250g肉', photo: 'photos/2026-05-12_晚餐_盐焘鸡腿娃娃菜.jpg', cal: 315, protein: 50, carbs: 0, fat: 12.5, fiber: 0 },
+  { date: '2026-05-12', meal: '晚餐 18:30', items: '娃娃菜 120g', photo: '', cal: 16, protein: 1.4, carbs: 2.4, fat: 0.1, fiber: 1.5 },
+  { date: '2026-05-12', meal: '晚餐 18:30', items: '白米饭 40g', photo: '', cal: 46, protein: 1, carbs: 10, fat: 0.1, fiber: 0 },
+  { date: '2026-05-12', meal: '晚餐 18:30', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-12', meal: '晚餐 18:30', items: '倍立健 1对+钙镁片 2片+鱼油1粒', photo: '', cal: 10, protein: 0, carbs: 0, fat: 0.7, fiber: 0 },
+  { date: '2026-05-12', meal: '晚餐 18:30', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+  { date: '2026-05-13', meal: '早餐 11:00', items: '奶昔（植物蛋白粉2勺+脱脂牛奶250ml+香蒕98g+蓝莓60g）', photo: '', cal: 280, protein: 26, carbs: 37, fat: 1.5, fiber: 3.5 },
+  { date: '2026-05-13', meal: '早餐 11:00', items: '倍立健 1对+钙镁片 2片+鱼油 2粒', photo: '', cal: 12, protein: 0, carbs: 0, fat: 1.4, fiber: 0 },
+  { date: '2026-05-13', meal: '午餐 13:00', items: '低脂牧羊人派（牛里脊200g+鸡腿肉100g+土豆泥180g+彩椒+香菇70g+洋葱+帕马森10g，零油）', photo: 'photos/2026-05-13_午餐_牧羊人派沙拉.jpg', cal: 620, protein: 69.2, carbs: 40.7, fat: 19.3, fiber: 6.3 },
+  { date: '2026-05-13', meal: '午餐 13:00', items: '黄瓜小西红柿沙拉（酸奨20g）', photo: '', cal: 60, protein: 3.7, carbs: 7.9, fat: 1.7, fiber: 2 },
+  { date: '2026-05-13', meal: '午餐 13:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-13', meal: '午餐 13:00', items: '益生菌+衡怡+葆芯2条+鱼油1粒', photo: '', cal: 40, protein: 0, carbs: 4, fat: 0.7, fiber: 0 },
+  { date: '2026-05-13', meal: '晚餐 20:00', items: '鸡腿炖菜土豆泥（鸡腿200g+香菇+彩椒+西红柿+洋葱+娃娃菜+土豆110g+橄榄油3g）', photo: 'photos/2026-05-13_晚餐_鸡腿炖菜土豆泥.jpg', cal: 462, protein: 48.1, carbs: 37.1, fat: 13.9, fiber: 9.3 },
+  { date: '2026-05-13', meal: '晚餐 20:00', items: '纽崔莱沛源蛋白粉 2勺', photo: '', cal: 112, protein: 16, carbs: 7.4, fat: 1.6, fiber: 1.2 },
+  { date: '2026-05-13', meal: '晚餐 20:00', items: '倍立健 1对+钙镁片 2片+鱼油1粒', photo: '', cal: 10, protein: 0, carbs: 0, fat: 0.7, fiber: 0 },
+  { date: '2026-05-13', meal: '晚餐 20:00', items: '益生菌+衡怡', photo: '', cal: 15, protein: 0, carbs: 3, fat: 0, fiber: 0 },
+];
+const DATA = [
+  { date: '2026-04-07', weight: 103.8, exercise: '', note: '起始', body: null },
+  { date: '2026-04-09', weight: 103.4, exercise: '划船机10min×1组', note: '', body: { bf: 35.1, muscle: 38.3, visceral: 15, bmi: 32.4 } },
+  { date: '2026-04-10', weight: 102.5, exercise: '骑行7km', note: '看演唱会', body: { bf: 35.9, muscle: 37.4, visceral: 15, bmi: null } },
+  { date: '2026-04-11', weight: 101.8, exercise: '骑行2-3km', note: '', body: { bf: 34.8, muscle: 37.8, visceral: 15, bmi: null } },
+  { date: '2026-04-12', weight: 102.6, exercise: '划船机10min', note: '昨晚3点睡7:45起', body: { bf: 32.6, muscle: 39.4, visceral: 14, bmi: null } },
+  { date: '2026-04-13', weight: 101.8, exercise: '', note: '', body: { bf: 38.1, muscle: 35.7, visceral: 18, bmi: null } },
+  { date: '2026-04-14', weight: 101.4, exercise: '', note: '', body: { bf: 36.7, muscle: 35.5, visceral: 17, bmi: null } },
+  { date: '2026-04-15', weight: 100.3, exercise: '', note: '凌晨3点睡 烧烤局', body: { bf: 35.5, muscle: 36.9, visceral: 16, bmi: null } },
+  { date: '2026-04-16', weight: 100.3, exercise: '', note: '出差开始', body: null },
+  { date: '2026-04-17', weight: 100.5, exercise: '', note: '火车日', body: null },
+  { date: '2026-04-19', weight: null, exercise: '景区步行12000步', note: '无锡出差', body: null },
+  { date: '2026-04-20', weight: 101.0, exercise: '', note: '出差回来', body: { bf: 36.4, muscle: 36.4, visceral: 17, bmi: null } },
+  { date: '2026-04-21', weight: 100.7, exercise: '', note: '5:30睡 9:30起', body: { bf: 31.2, muscle: 39.6, visceral: 14, bmi: null } },
+  { date: '2026-04-22', weight: 100.2, exercise: '', note: '', body: { bf: 35.7, muscle: 36.6, visceral: 16, bmi: null } },
+  { date: '2026-04-23', weight: 100.2, exercise: '', note: '', body: { bf: 35.9, muscle: 36.4, visceral: 16, bmi: null } },
+  { date: '2026-04-24', weight: 99.7, exercise: '', note: '破百！前晚火锅+酒吧', body: { bf: 35.7, muscle: 36.4, visceral: 16, bmi: null } },
+  { date: '2026-04-25', weight: 99.3, exercise: '羽毛球2h（上场4×15min）', note: '', body: { bf: 35.5, muscle: 36.4, visceral: 15, bmi: null } },
+  { date: '2026-04-26', weight: 99.2, exercise: '', note: '4点睡 8点起', body: { bf: 33.9, muscle: 37.2, visceral: 14, bmi: null } },
+  { date: '2026-04-27', weight: 99.0, exercise: '', note: '22:30睡 6:30起 8h', body: { bf: 33.7, muscle: 37.3, visceral: 15, bmi: null } },
+  { date: '2026-04-28', weight: 99.7, exercise: '', note: '前晚干锅牛蛙', body: { bf: 32.1, muscle: 38.5, visceral: 14, bmi: null } },
+  { date: '2026-04-29', weight: 99.6, exercise: '划船机10min×2组(122kcal)', note: '', body: { bf: 31.9, muscle: 38.7, visceral: 14, bmi: null } },
+  { date: '2026-04-30', weight: 99.4, exercise: '', note: '', body: { bf: 35.3, muscle: 36.5, visceral: 15, bmi: null } },
+  { date: '2026-05-02', weight: 99.8, exercise: '', note: '前晚寿司+乌冬', body: null },
+  { date: '2026-05-03', weight: 99.8, exercise: '', note: '', body: { bf: 32.5, muscle: 38.3, visceral: 14, bmi: null } },
+  { date: '2026-05-05', weight: 99.0, exercise: '', note: 'Checkpoint#1', body: { bf: 33.1, muscle: 37.7, visceral: 14, bmi: null } },
+  { date: '2026-05-06', weight: 97.8, exercise: '', note: 'InBody秤', body: { bf: 31.4, muscle: 38.2, visceral: 13, bmi: null } },
+  { date: '2026-05-07', weight: 97.6, exercise: '空腹划船机21min(117kcal)', note: 'InBody秤', body: { bf: 30.7, muscle: 38.7, visceral: 12, bmi: null } },
+  { date: '2026-05-08', weight: 97.8, exercise: '', note: 'InBody秤', body: { bf: 29.6, muscle: 39.3, visceral: 12, bmi: null } },
+  { date: '2026-05-09', weight: 97.5, exercise: '', note: 'Checkpoint#1达标! InBody', body: { bf: 29.0, muscle: 39.5, visceral: 12, bmi: null } },
+  { date: '2026-05-10', weight: 97.3, exercise: '', note: 'InBody', body: { bf: 30.0, muscle: 38.8, visceral: 12, bmi: null } },
+  { date: '2026-05-11', weight: 98.0, exercise: '', note: '前晚烤肉+酒', body: null },
+  { date: '2026-05-12', weight: 98.2, exercise: '', note: '前晚寿司+highball', body: null },
+  { date: '2026-05-13', weight: 97.5, exercise: '', note: 'InBody', body: { bf: 29.6, muscle: 39.1, visceral: 12, bmi: null } },
+];
+
+
+const GOAL = 75.0; // LGW 的目标体重
+const GOAL_DATE = '7月7日前（阶段目标85kg）'; // 目标日期，待设置
+
+// ===== 以下为渲染逻辑 =====
+const DAYS = ['日','一','二','三','四','五','六'];
+function dayOfWeek(d) { return DAYS[new Date(d).getDay()]; }
+function fmt(d) { return d.slice(5).replace('-','/'); }
+function diffDays(a, b) { return Math.round((new Date(b)-new Date(a))/86400000); }
+
+const withWeight = DATA.filter(d => d.weight !== null);
+
+if (withWeight.length < 1) {
+  document.getElementById('weeklyCards').innerHTML = '<div class="no-data glass"><div class="emoji">📝</div>还没有数据<br>LGW 快来报体重吧</div>';
+} else {
+  const first = withWeight[0];
+  const last = withWeight[withWeight.length - 1];
+  const days = diffDays(first.date, last.date);
+  const loss = first.weight - last.weight;
+  const weeks = days / 7 || 1;
+
+  document.getElementById('startW').textContent = first.weight.toFixed(1);
+  document.getElementById('startDate').textContent = fmt(first.date);
+  document.getElementById('currentW').textContent = last.weight.toFixed(1);
+  document.getElementById('currentDate').textContent = fmt(last.date);
+  document.getElementById('totalLoss').textContent = (loss >= 0 ? '-' : '+') + Math.abs(loss).toFixed(1) + 'kg';
+  document.getElementById('totalDays').textContent = days + '天';
+  document.getElementById('weeklyAvg').textContent = (loss / weeks).toFixed(2);
+
+  if (GOAL !== null) {
+    document.getElementById('goalW').textContent = GOAL.toFixed(1);
+    document.getElementById('goalDate').textContent = GOAL_DATE;
+    document.getElementById('toGoal').textContent = (last.weight - GOAL).toFixed(1) + 'kg';
+
+    const totalToLose = first.weight - GOAL;
+    const lost = first.weight - last.weight;
+    const pct = totalToLose > 0 ? Math.min(100, (lost / totalToLose * 100)).toFixed(0) : 0;
+    document.getElementById('pStart').textContent = first.weight.toFixed(1);
+    document.getElementById('pGoal').textContent = GOAL.toFixed(1);
+    document.getElementById('pPercent').textContent = pct + '%';
+    setTimeout(() => { document.getElementById('progressFill').style.width = pct + '%'; }, 100);
+  }
+
+  // Chart
+  const chartLabels = withWeight.map(d => fmt(d.date));
+  const chartData = withWeight.map(d => d.weight);
+
+  const gradient = document.getElementById('weightChart').getContext('2d');
+  const gFill = gradient.createLinearGradient(0, 0, 0, 300);
+  gFill.addColorStop(0, 'rgba(255, 127, 0, 0.25)');
+  gFill.addColorStop(1, 'rgba(255, 127, 0, 0.02)');
+
+  const datasets = [
+    {
+      label: '体重 (kg)',
+      data: chartData,
+      borderColor: '#FF7F00',
+      backgroundColor: gFill,
+      fill: true,
+      tension: 0.4,
+      borderWidth: 2.5,
+      pointBackgroundColor: '#fff',
+      pointBorderColor: '#FF7F00',
+      pointBorderWidth: 2,
+      pointRadius: 4,
+      pointHoverRadius: 8,
+    }
+  ];
+
+  if (GOAL !== null) {
+    datasets.push({
+      label: '目标 ' + GOAL + 'kg',
+      data: Array(chartLabels.length).fill(GOAL),
+      borderColor: 'rgba(76, 175, 80, 0.4)',
+      borderDash: [6, 4],
+      borderWidth: 1.5,
+      pointRadius: 0,
+      fill: false,
+    });
+  }
+
+  new Chart(document.getElementById('weightChart'), {
+    type: 'line',
+    data: { labels: chartLabels, datasets },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true, position: 'top', labels: { font: { size: 11 }, color: '#0066CC', usePointStyle: true, padding: 16 } },
+        tooltip: {
+          backgroundColor: 'rgba(255,240,245,0.95)',
+          titleColor: '#003366',
+          bodyColor: '#0066CC',
+          borderColor: 'rgba(233,30,99,0.2)',
+          borderWidth: 1,
+          cornerRadius: 10,
+          padding: 12,
+          callbacks: {
+            afterLabel: function(ctx) {
+              if (ctx.datasetIndex === 0) {
+                const d = withWeight[ctx.dataIndex];
+                let s = '';
+                if (d.exercise) s += '🏃 ' + d.exercise;
+                if (d.note) s += (s ? '\n' : '') + d.note;
+                return s;
+              }
             }
-        });
-    </script>
+          }
+        }
+      },
+      scales: {
+        y: {
+          min: GOAL ? Math.floor(GOAL - 1) : Math.floor(last.weight - 2),
+          max: Math.ceil(first.weight + 0.5),
+          ticks: { callback: v => v + 'kg', font: { size: 11 }, color: '#004080' },
+          grid: { color: 'rgba(255,255,255,0.04)' }
+        },
+        x: {
+          ticks: { font: { size: 10 }, maxRotation: 45, color: '#004080' },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+  // Weekly cards
+  function getWeekNum(dateStr) { return Math.floor(diffDays(DATA[0].date, dateStr) / 7); }
+  const weekMap = {};
+  withWeight.forEach(d => {
+    const wk = getWeekNum(d.date);
+    if (!weekMap[wk]) weekMap[wk] = [];
+    weekMap[wk].push(d);
+  });
+  const weeklyEl = document.getElementById('weeklyCards');
+  Object.keys(weekMap).sort((a,b) => a-b).forEach(wk => {
+    const entries = weekMap[wk];
+    const wStart = entries[0].weight;
+    const wEnd = entries[entries.length-1].weight;
+    const wLoss = wStart - wEnd;
+    const card = document.createElement('div');
+    card.className = 'week-card glass';
+    card.innerHTML = `
+      <div class="wk">第${parseInt(wk)+1}周</div>
+      <div class="wv">${wLoss >= 0 ? '-' : '+'}${Math.abs(wLoss).toFixed(1)}kg</div>
+      <div class="wk">${wStart.toFixed(1)} → ${wEnd.toFixed(1)}</div>
+    `;
+    weeklyEl.appendChild(card);
+  });
+}
+
+// Table
+const tbody = document.getElementById('tableBody');
+let prevWeight = null;
+DATA.forEach(d => {
+  const tr = document.createElement('tr');
+  let changeHtml = '<span class="weight-same">-</span>';
+  if (d.weight !== null) {
+    if (prevWeight !== null) {
+      const diff = d.weight - prevWeight;
+      if (diff < 0) changeHtml = `<span class="weight-down">${diff.toFixed(1)}</span>`;
+      else if (diff > 0) changeHtml = `<span class="weight-up">+${diff.toFixed(1)}</span>`;
+      else changeHtml = `<span class="weight-same">0</span>`;
+    }
+    prevWeight = d.weight;
+  }
+  const exerciseHtml = d.exercise ? `<span class="exercise-tag">${d.exercise}</span>` : '';
+  const weightVal = d.weight !== null ? d.weight.toFixed(1) : '-';
+  let weightCell = `<td style="font-weight:600">${weightVal}`;
+  if (d.body) {
+    const b = d.body;
+    weightCell += `<span class="body-info"><span class="info-icon" onclick="this.nextElementSibling.classList.toggle('show')">ⓘ</span><span class="body-tip"><div class="tip-row"><span class="tip-label">体脂率</span><span class="tip-val">${b.bf}%</span></div><div class="tip-row"><span class="tip-label">肌肉量</span><span class="tip-val">${b.muscle}kg</span></div><div class="tip-row"><span class="tip-label">内脏脂肪</span><span class="tip-val">${b.visceral}</span></div>${b.bmi ? `<div class="tip-row"><span class="tip-label">BMI</span><span class="tip-val">${b.bmi}</span></div>` : ''}</span></span>`;
+  }
+  weightCell += '</td>';
+  tr.innerHTML = `
+    <td>${fmt(d.date)}</td>
+    <td>${dayOfWeek(d.date)}</td>
+    ${weightCell}
+    <td>${changeHtml}</td>
+    <td>${exerciseHtml}</td>
+    <td>${d.note || ''}</td>
+  `;
+  tbody.appendChild(tr);
+});
+
+// Group meals by meal name for carousel (merge items of same meal into one card)
+function groupMeals(meals) {
+  const map = {};
+  meals.forEach(m => {
+    const key = m.meal;
+    if (!map[key]) map[key] = { meal: m.meal, items: [], photos: [], cal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
+    map[key].items.push({ name: m.items, cal: m.cal });
+    if (m.photo) map[key].photos.push(m.photo);
+    map[key].cal += m.cal || 0;
+    map[key].protein += m.protein || 0;
+    map[key].carbs += m.carbs || 0;
+    map[key].fat += m.fat || 0;
+    map[key].fiber += m.fiber || 0;
+  });
+  return Object.values(map);
+}
+
+function buildCarousel(wrapEl, trackEl, dotsEl, grouped) {
+  let idx = 0;
+  grouped.forEach(g => {
+    const card = document.createElement('div');
+    card.className = 'carousel-card glass';
+    const photoHtml = g.photos.length === 1
+      ? `<img class="cc-photo" src="${g.photos[0]}" alt="${g.meal}" loading="lazy">`
+      : g.photos.length > 1
+        ? `<div class="cc-collage cc-collage-${Math.min(g.photos.length, 4)}">${g.photos.slice(0, 4).map(p => `<img src="${p}" alt="${g.meal}" loading="lazy">`).join('')}</div>`
+        : '';
+    const itemsHtml = g.items.map(i => `<div class="cc-item"><span>${i.name}</span><span>${f(i.cal)} kcal</span></div>`).join('');
+    card.innerHTML = `
+      <div class="cc-header"><span class="cc-meal">${g.meal}</span><span class="cc-cal">${f(g.cal)} kcal</span></div>
+      ${photoHtml}
+      <div class="cc-items">${itemsHtml}</div>
+      <div class="cc-macros">
+        <span>蛋白质 ${f(g.protein)}g</span><span>碳水 ${f(g.carbs)}g</span><span>脂肪 ${f(g.fat)}g</span>
+        ${g.fiber ? `<span>纤维 ${f(g.fiber)}g</span>` : ''}
+      </div>
+    `;
+    trackEl.appendChild(card);
+  });
+  // dots
+  grouped.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goTo(i);
+    dotsEl.appendChild(dot);
+  });
+  // arrows
+  if (grouped.length > 1) {
+    const prev = document.createElement('button');
+    prev.className = 'carousel-nav prev';
+    prev.innerHTML = '‹';
+    prev.onclick = () => goTo(Math.max(0, idx - 1));
+    const next = document.createElement('button');
+    next.className = 'carousel-nav next';
+    next.innerHTML = '›';
+    next.onclick = () => goTo(Math.min(grouped.length - 1, idx + 1));
+    wrapEl.appendChild(prev);
+    wrapEl.appendChild(next);
+  }
+  function goTo(i) {
+    idx = i;
+    trackEl.style.transform = `translateX(-${i * 100}%)`;
+    dotsEl.querySelectorAll('.dot').forEach((d, j) => d.classList.toggle('active', j === i));
+  }
+  // swipe
+  let startX = 0;
+  trackEl.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
+  trackEl.addEventListener('touchend', e => {
+    const diff = startX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) goTo(Math.max(0, Math.min(grouped.length - 1, idx + (diff > 0 ? 1 : -1))));
+  });
+}
+
+// Today's meals carousel
+const today = new Date().toISOString().slice(0, 10);
+const todayMeals = MEALS.filter(m => m.date === today);
+const todayTrack = document.getElementById('todayTrack');
+const todayDots = document.getElementById('todayDots');
+const todayCarousel = document.getElementById('todayCarousel');
+
+if (todayMeals.length === 0) {
+  todayCarousel.innerHTML = '<div class="no-meals glass">今天还没有饮食记录 🍽️</div>';
+} else {
+  const grouped = groupMeals(todayMeals);
+  buildCarousel(todayCarousel, todayTrack, todayDots, grouped);
+  document.getElementById('todaySummary').style.display = 'block';
+  let tCal = 0, tP = 0, tC = 0, tF = 0, tFiber = 0;
+  todayMeals.forEach(m => { tCal += m.cal||0; tP += m.protein||0; tC += m.carbs||0; tF += m.fat||0; tFiber += m.fiber||0; });
+  document.getElementById('todayCal').textContent = f(tCal);
+  document.getElementById('todayCalTarget').textContent = `/ ${DAILY_TARGET.cal} kcal`;
+  document.getElementById('todayP').textContent = f(tP);
+  document.getElementById('todayPTarget').textContent = `/ ${DAILY_TARGET.protein}g`;
+  document.getElementById('todayC').textContent = f(tC);
+  document.getElementById('todayCTarget').textContent = `/ ${DAILY_TARGET.carbs}g`;
+  document.getElementById('todayF').textContent = f(tF);
+  document.getElementById('todayFTarget').textContent = `/ ${DAILY_TARGET.fat}g`;
+  document.getElementById('todayFiber').textContent = f(tFiber);
+  document.getElementById('todayCount').textContent = grouped.length;
+}
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).style.display = 'block';
+  });
+});
+
+// Diet history (all days) - carousel per day
+const dietEl = document.getElementById('dietHistory');
+if (MEALS.length === 0) {
+  dietEl.innerHTML = '<div class="no-meals glass" style="margin:10px 0;">还没有饮食记录 🍽️</div>';
+} else {
+  const dayMap = {};
+  MEALS.forEach(m => { if (!dayMap[m.date]) dayMap[m.date] = []; dayMap[m.date].push(m); });
+  Object.keys(dayMap).sort().reverse().forEach(date => {
+    const meals = dayMap[date];
+    const dayCal = meals.reduce((s, m) => s + (m.cal || 0), 0);
+    const grouped = groupMeals(meals);
+
+    const section = document.createElement('div');
+    section.className = 'diet-day glass';
+    section.innerHTML = `
+      <div class="diet-day-header">
+        <span>${fmt(date)} 星期${dayOfWeek(date)}</span>
+        <span style="display:flex;align-items:center;gap:8px;">
+          <span class="day-cal">${f(dayCal)} kcal</span>
+          <span class="toggle-icon">›</span>
+        </span>
+      </div>
+      <div class="diet-day-body">
+        <div class="carousel-wrap"><div class="carousel-track"></div><div class="carousel-dots"></div></div>
+      </div>
+    `;
+    const header = section.querySelector('.diet-day-header');
+    const body = section.querySelector('.diet-day-body');
+    const icon = section.querySelector('.toggle-icon');
+    header.addEventListener('click', () => {
+      const open = body.style.display === 'block';
+      body.style.display = open ? 'none' : 'block';
+      icon.classList.toggle('open', !open);
+      if (!body.dataset.init) {
+        const cWrap = body.querySelector('.carousel-wrap');
+        buildCarousel(cWrap, cWrap.querySelector('.carousel-track'), cWrap.querySelector('.carousel-dots'), grouped);
+        body.dataset.init = '1';
+      }
+    });
+    dietEl.appendChild(section);
+  });
+}
+// Close body tooltips on outside click
+document.addEventListener('click', e => {
+  if (!e.target.classList.contains('info-icon')) {
+    document.querySelectorAll('.body-tip.show').forEach(t => t.classList.remove('show'));
+  }
+});
+</script>
 </body>
 </html>
